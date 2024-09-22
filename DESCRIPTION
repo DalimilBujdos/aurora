@@ -46,3 +46,5 @@ Suggests:
 VignetteBuilder: knitr
 BuildVignettes: true
 LazyData: true
+URL: https://github.com/DalimilBujdos/aurora
+BugReports: https://github.com/DalimilBujdos/aurora/issues
