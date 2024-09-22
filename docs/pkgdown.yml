@@ -1,0 +1,10 @@
+pandoc: 3.1.11
+pkgdown: 2.1.1
+pkgdown_sha: ~
+articles:
+  get_bags: get_bags.html
+  panGWAS: panGWAS.html
+  panGWAS_with_large_dataset: panGWAS_with_large_dataset.html
+  setup_conda: setup_conda.html
+  SNP_and_kmer_GWAS: SNP_and_kmer_GWAS.html
+last_built: 2024-09-21T19:12Z

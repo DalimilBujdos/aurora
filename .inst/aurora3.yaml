@@ -1,0 +1,45 @@
+name: aurora3
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - bzip2=1.0.8=h8ffe710_4
+  - ca-certificates=2022.9.24=h5b45459_0
+  - intel-openmp=2022.1.0=h57928b3_3787
+  - joblib=1.2.0=pyhd8ed1ab_0
+  - libblas=3.9.0=16_win64_mkl
+  - libcblas=3.9.0=16_win64_mkl
+  - libffi=3.4.2=h8ffe710_5
+  - liblapack=3.9.0=16_win64_mkl
+  - libsqlite=3.39.4=hcfcfb64_0
+  - libzlib=1.2.13=hcfcfb64_4
+  - m2w64-gcc-libgfortran=5.3.0=6
+  - m2w64-gcc-libs=5.3.0=7
+  - m2w64-gcc-libs-core=5.3.0=7
+  - m2w64-gmp=6.1.0=2
+  - m2w64-libwinpthread-git=5.0.0.4634.697f757=2
+  - mkl=2022.1.0=h6a75c08_874
+  - msys2-conda-epoch=20160418=1
+  - numpy=1.23.4=py310h4a8f9c9_1
+  - openssl=3.0.5=hcfcfb64_2
+  - pandas=1.5.1=py310h1c4a608_1
+  - pip=22.3=pyhd8ed1ab_0
+  - python=3.10.6=hcf16a7b_0_cpython
+  - python-dateutil=2.8.2=pyhd8ed1ab_0
+  - python_abi=3.10=2_cp310
+  - pytz=2022.5=pyhd8ed1ab_0
+  - scikit-learn=1.1.2=py310h3a564e9_0
+  - scipy=1.9.3=py310h578b7cb_0
+  - setuptools=65.5.0=pyhd8ed1ab_0
+  - six=1.16.0=pyh6c4a22f_0
+  - tbb=2021.6.0=h91493d7_1
+  - threadpoolctl=3.1.0=pyh8a188c0_0
+  - tk=8.6.12=h8ffe710_0
+  - tzdata=2022e=h191b570_0
+  - ucrt=10.0.22621.0=h57928b3_0
+  - vc=14.3=h3d8a991_9
+  - vs2015_runtime=14.32.31332=h1d6e394_9
+  - wheel=0.37.1=pyhd8ed1ab_0
+  - xz=5.2.6=h8d14728_0
+prefix: C:\ProgramData\Anaconda3\envs\aurora2

@@ -1,0 +1,48 @@
+Package: aurora
+Title: AUtochthonous Random fOrest Random wAlk algorithm 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Dalimil", "Bujdoš", , "dbujdos@umail.ucc.ie", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1709-8289"))
+Description: The microbial population from a given habitat contains autochthonous microbes
+ (i.e., able to form a stable colony) and microbes that are allochthonous which cannot form
+ a stable colony. This fact complicates the analysis of adaptation strategies towards the
+ habitat because the allochthonous strains represent mislabelled observations. This package
+ aims to highlight microbial strains whose origin is NOT in the analyzed habitat and likewise
+ microbialstrains who likely CAN survive in the habitat but were isolated from another source.
+ Additionally, aurora's GWAS approach operates without the presumption that the trait did not impact the phylogeny.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    ape,
+    caret,
+    dbscan,
+    dplyr,
+    EnvStats,
+    ggplot2,
+    gplots,
+    mlrMBO,
+    phangorn,
+    phytools,
+    pROC,
+    purrr,
+    randomForest,
+    readr,
+    readxl,
+    reticulate,
+    rlist,
+    rpart,
+    stringr,
+    treeWAS
+Suggests: 
+    knitr,
+    rmarkdown,
+    xgboost,
+    proxy,
+    FactoMiner,
+    mlr
+VignetteBuilder: knitr
+BuildVignettes: true
+LazyData: true

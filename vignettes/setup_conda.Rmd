@@ -1,0 +1,33 @@
+---
+title: "setup_conda"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{setup_conda}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  cache.lazy = FALSE
+)
+```
+This vignette demonstrates how to set up conda environment for *aurora*. This will allow you to use log regression and AdaBoost in function `aurora_pheno()`. The function that sets up the environment (`setup_conda()`) has no input and only one output which is the path to the conda environment. This path then has to be specified in function `aurora_pheno()`.
+```{r, eval = FALSE}
+library(aurora)
+# set up conda environment using packaged .yaml file
+conda_path <- setup_conda() # make sure that the path is in this format: /path/to/dir
+
+# now you can use the path in aurora_pheno() and log regression and AdaBoost will be run
+results <- aurora_pheno(pheno_mat = pheno_mat,
+                        bin_mat = bin_mat,
+                        tree = tree,
+                        condaenv_path = conda_path,
+                        save_dir = "/path/to/save/dir")
+
+```
