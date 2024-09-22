@@ -486,7 +486,7 @@ aurora_GWAS <- function(pheno_mat,
     }
   }
 
-  # this is needed to calculate the chisq accueately
+  # this is needed to calculate the chisq accureately
   host_counts_original <- as.data.frame(table(pheno_mat$pheno))
   # calculate sensitivity specificity, F1, and chisq test for each gf in each pheno
   calcul_stats <- function(gf, pheno_mat, phenotypes, host_counts_original) {
