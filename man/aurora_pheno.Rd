@@ -194,7 +194,9 @@ by an argument \code{save_dir}. Default: TRUE.}
 The output is a nested list that mainly contains a table for each ML tool.
 The tables show which strains were identified as autochthonous and allochthonous.
 The list also contains p-value matrices that show if the entire species is adapted
-to the investigated phenotype.
+to the investigated phenotype. If \code{write_csv} was set to \code{TRUE} and \code{save_dir}
+was provided then distance matrices are written to the folder. For more information about the
+output check https://dalimilbujdos.github.io/aurora/articles/outputs.html.
 }
 \description{
 Main function of the aurora package. This function determines if the analysed species is adapted to the investigated phenotype and it also identifies
@@ -208,6 +210,7 @@ mislabeled strains. The output of this function can be used as an input into \co
   data(tree_reuteri)
 
   aurora_pheno(bin_mat = bin_mat,
+               type_bin_mat = "panaroo",
                pheno_mat = pheno_mat,
                tree = tree,
                save_dir = "/path/to/my/dir/")

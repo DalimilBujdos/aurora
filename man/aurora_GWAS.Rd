@@ -28,7 +28,9 @@ aurora_GWAS(
   write_data = TRUE,
   save_dir = NA,
   run_hogwash = FALSE,
+  perm_val = NA,
   run_treeWAS = FALSE,
+  n.snps.sim_val = NA,
   get_scoary = FALSE,
   get_pyseer = FALSE
 )
@@ -104,18 +106,22 @@ by an argument save_dir. Default: TRUE.}
 
 \item{run_hogwash}{If set to TRUE then mGWAS tool hogwash will be run with the same input as \code{aurora_GWAS}. Default: FALSE.}
 
+\item{perm_val}{perm value for runnig Hogwash. default: 5000.}
+
 \item{run_treeWAS}{If set to TRUE then mGWAS tool TreeWAS will be run with the same input as \code{aurora_GWAS}. Default: FALSE.}
+
+\item{n.snps.sim_val}{n.snps.sim value for runnig TreeWAS. default: 100*number of features.}
 
 \item{get_scoary}{If set to TRUE then an input into mGWAS tool Scoary will be constructed. Default: FALSE.}
 
 \item{get_pyseer}{If set to TRUE then an input into mGWAS tool Pyseer will be constructed. Default: FALSE.}
 }
 \value{
-The output of this function is a data frame that contains: the relative abundance of the feature in the class,
+The output of this function is a data frame that contains: the frequency of the feature in the class,
 standardized residuals, precision, recall and F1 values for each feature and class. Additionally the output contains a
 data frame that shows which strains were removed. If get_bagging_counts was set to TRUE than the output will also contain
 a data frame that shows how many times was each strain repeated in the bag. If the user also requested to run hogwash or
-TreeWAS then the result of these two tools will also be part of the output.
+TreeWAS then the result of these two tools will also be part of the output. For more information about the output check https://dalimilbujdos.github.io/aurora/articles/outputs.html.
 }
 \description{
 Function that run GWAS analysis
@@ -128,6 +134,7 @@ Function that run GWAS analysis
   data(aurora_pheno_results_reuteri)
 
   aurora_GWAS(bin_mat = bin_mat,
+              type_bin_mat = "panaroo",
               pheno_mat = pheno_mat,
               tree = tree,
               aurora_results = results,

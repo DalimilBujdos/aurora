@@ -1,5 +1,10 @@
 ---
 title: "outputs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{outputs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -62,4 +67,3 @@ result_treeWAS_ordered: Ordered results from running TreeWAS. The p-values are c
 If `write_data` is set to `TRUE` and `save_dir` provided then the TreeWAS results are also written `treeWAS_results_[date]`.
 If requested then binary matrices, phylogenetic trees and phenotypic matrices are written for [Scoary](https://github.com/AdmiralenOla/Scoary) and [Pyseer](https://github.com/mgalardini/pyseer). These files are correctly formatted can be used to run these tools.
 
-    

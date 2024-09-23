@@ -1,16 +1,10 @@
 Package: aurora
 Title: AUtochthonous Random fOrest Random wAlk algorithm 
-Version: 0.0.0.9000
+Version: 1.0.0.
 Authors@R: 
     person("Dalimil", "Bujdoš", , "dbujdos@umail.ucc.ie", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1709-8289"))
-Description: The microbial population from a given habitat contains autochthonous microbes
- (i.e., able to form a stable colony) and microbes that are allochthonous which cannot form
- a stable colony. This fact complicates the analysis of adaptation strategies towards the
- habitat because the allochthonous strains represent mislabelled observations. This package
- aims to highlight microbial strains whose origin is NOT in the analyzed habitat and likewise
- microbialstrains who likely CAN survive in the habitat but were isolated from another source.
- Additionally, aurora's GWAS approach operates without the presumption that the trait did not impact the phylogeny.
+Description: A primary goal of microbial Genome Wide Association Studies is identifying genomic variants associated with habitats. Existing tools fail to identify known causal variants if the analyzed trait (like habitat adaptation) shaped the phylogeny. Due to the presence of allochthonous strains or metadata errors  the stated sources of microbial strains in public databases are often incorrect. We developed a new tool aurora (https://github.com/DalimilBujdos/aurora) that identifies autochthonous strains and the genes associated with habitats while acknowledging the potential role of the trait in shaping the phylogeny. We successfully validated aurora by applying it to simulated datasets, and multiple species with various traits. 
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

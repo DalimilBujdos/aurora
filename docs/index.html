@@ -6,23 +6,30 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>AUtochthonous Random fOrest Random wAlk algorithm • aurora</title>
+<!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="apple-touch-icon-60x60.png">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="AUtochthonous Random fOrest Random wAlk algorithm">
-<meta name="description" content="The microbial population from a given habitat contains autochthonous microbes (i.e., able to form a stable colony) and microbes that are allochthonous which cannot form a stable colony. This fact complicates the analysis of adaptation strategies towards the habitat because the allochthonous strains represent mislabelled observations. This package aims to highlight microbial strains whose origin is NOT in the analyzed habitat and likewise microbialstrains who likely CAN survive in the habitat but were isolated from another source. Additionally, aurora's GWAS approach operates without the presumption that the trait did not impact the phylogeny.">
-<meta property="og:description" content="The microbial population from a given habitat contains autochthonous microbes (i.e., able to form a stable colony) and microbes that are allochthonous which cannot form a stable colony. This fact complicates the analysis of adaptation strategies towards the habitat because the allochthonous strains represent mislabelled observations. This package aims to highlight microbial strains whose origin is NOT in the analyzed habitat and likewise microbialstrains who likely CAN survive in the habitat but were isolated from another source. Additionally, aurora's GWAS approach operates without the presumption that the trait did not impact the phylogeny.">
+<meta name="description" content="A primary goal of microbial Genome Wide Association Studies is identifying genomic variants associated with habitats. Existing tools fail to identify known causal variants if the analyzed trait (like habitat adaptation) shaped the phylogeny. Due to the presence of allochthonous strains or metadata errors the stated sources of microbial strains in public databases are often incorrect. We developed a new tool aurora (https://github.com/DalimilBujdos/aurora) that identifies autochthonous strains and the genes associated with habitats while acknowledging the potential role of the trait in shaping the phylogeny. We successfully validated aurora by applying it to simulated datasets, and multiple species with various traits.">
+<meta property="og:description" content="A primary goal of microbial Genome Wide Association Studies is identifying genomic variants associated with habitats. Existing tools fail to identify known causal variants if the analyzed trait (like habitat adaptation) shaped the phylogeny. Due to the presence of allochthonous strains or metadata errors the stated sources of microbial strains in public databases are often incorrect. We developed a new tool aurora (https://github.com/DalimilBujdos/aurora) that identifies autochthonous strains and the genes associated with habitats while acknowledging the potential role of the trait in shaping the phylogeny. We successfully validated aurora by applying it to simulated datasets, and multiple species with various traits.">
+<meta property="og:image" content="https://dalimilbujdos.github.io/aurora/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-dark" data-bs-theme="dark" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="index.html">aurora</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +43,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/get_bags.html">get_bags</a></li>
+    <li><a class="dropdown-item" href="articles/outputs.html">outputs</a></li>
     <li><a class="dropdown-item" href="articles/panGWAS.html">panGWAS</a></li>
     <li><a class="dropdown-item" href="articles/panGWAS_with_large_dataset.html">panGWAS_with_large_dataset</a></li>
     <li><a class="dropdown-item" href="articles/setup_conda.html">setup_conda</a></li>
@@ -55,8 +63,26 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9">
-The microbial population from a given habitat contains autochthonous microbes (i.e., able to form a stable colony) and microbes that are allochthonous which cannot form a stable colony. This fact complicates the analysis of adaptation strategies towards the habitat because the allochthonous strains represent mislabelled observations. This package aims to highlight microbial strains whose origin is NOT in the analyzed habitat and likewise microbialstrains who likely CAN survive in the habitat but were isolated from another source. Additionally, aurora's GWAS approach operates without the presumption that the trait did not impact the phylogeny.
+  <main id="main" class="col-md-9"><div class="section level1">
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="aurora-">
+<em>aurora</em> 
+<a class="anchor" aria-label="anchor" href="#aurora-"></a>
+</h1>
+</div>
+<!-- badges: start -->
+<!-- badges: end -->
+<p>Description: A primary goal of microbial Genome Wide Association Studies is identifying genomic variants associated with habitats. Existing tools fail to identify known causal variants if the analyzed trait (like habitat adaptation) shaped the phylogeny. Due to the presence of allochthonous strains or metadata errors the stated sources of microbial strains in public databases are often incorrect. We developed a new tool aurora (<a href="https://github.com/DalimilBujdos/aurora" class="external-link uri">https://github.com/DalimilBujdos/aurora</a>) that identifies autochthonous strains and the genes associated with habitats while acknowledging the potential role of the trait in shaping the phylogeny. We successfully validated aurora by applying it to simulated datasets, and multiple species with various traits.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can install the development version of aurora from <a href="https://github.com/DalimilBujdos/aurora/" class="external-link">GitHub</a> with:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"DalimilBujdos/aurora"</span><span class="op">)</span></span></code></pre></div>
+<p>For instructions on how to use the package, please refer to <a href="https://dalimilbujdos.github.io/aurora/articles/panGWAS.html">vignettes</a></p>
+</div>
+</div>
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">

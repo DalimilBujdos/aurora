@@ -47,15 +47,17 @@
 #'                    by an argument save_dir. Default: TRUE.
 #' @param save_dir An exact system path to the directory where the result will be written.
 #' @param run_hogwash If set to TRUE then mGWAS tool hogwash will be run with the same input as \code{aurora_GWAS}. Default: FALSE.
+#' @param perm_val perm value for runnig Hogwash. default: 5000.
 #' @param run_treeWAS If set to TRUE then mGWAS tool TreeWAS will be run with the same input as \code{aurora_GWAS}. Default: FALSE.
+#' @param n.snps.sim_val n.snps.sim value for runnig TreeWAS. default: 100*number of features.
 #' @param get_scoary If set to TRUE then an input into mGWAS tool Scoary will be constructed. Default: FALSE.
 #' @param get_pyseer If set to TRUE then an input into mGWAS tool Pyseer will be constructed. Default: FALSE.
 #'
-#' @returns The output of this function is a data frame that contains: the relative abundance of the feature in the class,
+#' @returns The output of this function is a data frame that contains: the frequency of the feature in the class,
 #'          standardized residuals, precision, recall and F1 values for each feature and class. Additionally the output contains a
 #'          data frame that shows which strains were removed. If get_bagging_counts was set to TRUE than the output will also contain
 #'          a data frame that shows how many times was each strain repeated in the bag. If the user also requested to run hogwash or
-#'          TreeWAS then the result of these two tools will also be part of the output.
+#'          TreeWAS then the result of these two tools will also be part of the output. For more information about the output check https://dalimilbujdos.github.io/aurora/articles/outputs.html.
 #' @export
 #'
 #' @examples
@@ -66,6 +68,7 @@
 #'   data(aurora_pheno_results_reuteri)
 #'
 #'   aurora_GWAS(bin_mat = bin_mat,
+#'               type_bin_mat = "panaroo",
 #'               pheno_mat = pheno_mat,
 #'               tree = tree,
 #'               aurora_results = results,
@@ -94,7 +97,9 @@ aurora_GWAS <- function(pheno_mat,
                         write_data = TRUE,
                         save_dir = NA,
                         run_hogwash = FALSE,
+                        perm_val = NA,
                         run_treeWAS = FALSE,
+                        n.snps.sim_val = NA,
                         get_scoary = FALSE,
                         get_pyseer = FALSE) {
 
@@ -611,7 +616,7 @@ aurora_GWAS <- function(pheno_mat,
 
       # not all trees have bootstrap values. Set all bootstrap vals to 100 to avoid errors
       tree_hog$node.label <- rep("100",  length(tree_hog$node.label))
-
+      perm_val <- if(is.na(perm_val)) {5000} else {perm_val}
       cat("Running Hogwash\n")
       res_hogwash <- hogwash::hogwash(pheno =  pheno_mat_mat,
                                       geno = bin_mat_hog,
@@ -619,7 +624,7 @@ aurora_GWAS <- function(pheno_mat,
                                       test = "both",
                                       dir = save_dir,
                                       fdr = 0.99,
-                                      perm = 5000)
+                                      perm = perm_val)
 
       results <- rlist::list.append(results, results_hogwash = res_hogwash)
     }
@@ -640,12 +645,13 @@ aurora_GWAS <- function(pheno_mat,
       bin_mat_WAS <- bin_mat_WAS[, which(colSums(bin_mat_WAS) != 0 & colSums(bin_mat_WAS) != nrow(bin_mat_WAS))]
       # NA means that treeWAS will treat it as binary
       phen_type <- ifelse(length(phenotypes) == 2, NA,"categorical")
+      n.snps.sim_val <- if(is.na(n.snps.sim_val)) {100*ncol(bin_mat)} else {n.snps.sim_val}
       cat("Running TreeWAS\n")
       result_treeWAS <- treeWAS::treeWAS(bin_mat_WAS,
                                          pheno_mat_WAS,
                                          phen.type = phen_type,
                                          tree = dist_mat_or_tree,
-                                         n.snps.sim = 100*ncol(bin_mat),
+                                         n.snps.sim = n.snps.sim_val,
                                          p.value = 0.99,
                                          p.value.correct = "fdr",
                                          plot.tree = FALSE, # makes the output too large
