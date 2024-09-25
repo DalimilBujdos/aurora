@@ -1,0 +1,107 @@
+---
+title: "outputs"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{outputs}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+## Outputs
+
+This article details all outputs from two main functions of the *aurora* package `aurora_pheno()` and `aurora_GWAS()` and a minor function `get_bags()`. The output from both functions depends on what parameters were used and thus not all objects showed here may be part of your output. Additionally, some output objects are not stored as R objects but are simply saved to a directory that is specified in the function call with an argument `save_dir`.
+
+## Outputs of function `aurora_pheno()`
+
+`call`: `aurora_pheno()` function call with all used arguments.
+
+`bin_mat`: The supplied binary matrix before any filtering.
+
+`phenotypes`: All analysed phenotype classes.
+
+#If Random Forest was used
+
+`$results$results_random_forest$p_val_mat`: Matrix that shows results of pairwise Kolmogorov-Smirnov tests. This matrix is used to indicate if the species has evolved adaptation strategy towards phenotype classes. If both p-values (Class_A vs Class_B, Class_B vs Class_A) are above 0.05 then the two classes should be considered indistinguishable. This has no effect on subsequent run on `aurora_GWAS()`. If any two classes are indistinguishable then `aurora_GWAS()` prints only a warning and proceeds to remove mislabeled strains rather then all strains from the two classes.
+
+`$results$results_random_forest$auto_allo_results`: This data frame contains the raw results of `aurora_pheno()`. It shows the predicted and observed phenotype class for each strain. It also shows a detailed breakdown of each strains adaptation capability. There are four possible labels that characterize adaptation of a strain to a class: FALSE, TRUE, TRUE not typical and INCONCLUSIVE. FALSE simply states that the strain is not adapted to the class. TRUE shows the opposite. TRUE not typical points out that the strain may be adapted to the class but likely does not possess some key adaptation factors (i.e., weakly autochthonous strain). INCONCLUSIVE then states that neither of the previous labels could be identified. If the predicted phenotype class is not the same as the observed then `aurora_GWAS()` removes these strains.
+
+`$results$results_random_forest$plot`: Plot showing a percentage distribution of `auto_allo_results`.
+
+`$results$results_random_forest$distance_heatmap_median`: Pairwise distance matrix containing Random Forest proximities calculated from Random forest models constructed in Outlier Calculation Phase. The final value is a median of all the proximities. This matrix is clustered and saved as `aurora_heatmap_median_random_forest_[date]` if `write_data` is set to `TRUE` and `save_dir` provided.
+
+`$results$results_random_forest$distance_heatmap_sum`: Same as above but the final value is a sum of all the proximities. This matrix is clustered and saved as `aurora_heatmap_sum_random_forest_[date]` if `write_data` is set to `TRUE` and `save_dir` provided.
+
+`$results$results_random_forest$legend_heatmap`: Legend describing row and column colors in `aurora_heatmap_median_random_forest_[date]` and`aurora_heatmap_sum_random_forest_[date]`.
+
+`$results$results_random_forest$gfs_importance`: This data frame shows the feature importances calculated from Random Forest models constructed in Outlier Calculation Phase. `MeanDecreaseAccuracy_median` indicates the median of MeanDecreaseAccuracy values, likewise MeanDecreaseGini_median shows mean of all MeanDecreaseGini. See  `randomForest::randomForest::randomForest()` for more information about these values. The subsequent columns show the presence pattern of the feature in all phenotype classes in this format: the feature is present|all strains in the class.
+
+`$results$results_random_forest$aucs`: Area under receiver-operating characteristic curve (ROC curve) for all Random Forest models constructed in Outlier Calculation Phase.
+
+#If AdaBoost was used
+
+`$results$results_adaboost$p_val_mat`: Same as `$results$results_random_forest$p_val_mat` above.
+
+`$results$results_adaboost$auto_allo_results`: Same as `$results$results_random_forest$auto_allo_results` above.
+
+`$results$results_adaboost$plot`: Same as `$results$results_random_forest$plot` above.
+
+`$results$results_adaboost$gfs_importance`: Same as `$results$results_random_forest$gfs_importance` above. See [AdaBoost documentation](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html) to find more information about AdaBoost feature importances.
+
+`$results$results_adaboost$aucs`: Same as `$results$results_random_forest$aucs` above.
+
+#If Log regression was used
+
+`$results$results_log_reg$p_val_mat`: Same as `$results$results_random_forest$p_val_mat` above.
+
+`$results$results_log_reg$auto_allo_results`: Same as `$results$results_random_forest$auto_allo_results` above.
+
+`$results$results_log_reg$plot`: Same as `$results$results_random_forest$plot` above.
+
+`$results$results_log_reg$gfs_importance`: Same as `$results$results_random_forest$gfs_importance` above. See [Log regression documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html) to find more information about Log regression feature importances.
+
+`$results$results_log_reg$aucs`: Same as `$results$results_random_forest$aucs` above.
+
+#If CARTx was used
+
+`$results$results_CART$p_val_mat`: Same as `$results$results_random_forest$p_val_mat` above.
+
+`$results$results_CART$auto_allo_results`: Same as `$results$results_random_forest$auto_allo_results` above.
+
+`$results$results_CART$plot`: Same as `$results$results_random_forest$plot` above.
+
+`$results$results_CART$gfs_importance`: Same as `$results$results_random_forest$gfs_importance` above. Feature importances in CART models are sum of the goodness of split measures for each split in the tree. See [rpart vignettes](https://cran.r-project.org/web/packages/rpart/vignettes/) to find more information about CART feature importances.
+
+`$results$results_CART$aucs`: Same as `$results$results_random_forest$aucs` above.
+
+`$results$results_CART$distance_heatmap`: Pairwise distance matrix containing CART proximities calculated from CART models constructed in Outlier Calculation Phase. The proximity calculation is described in Figure S5 in the *aurora* article. This matrix is clustered and saved as `aurora_heatmap_CART_[date]` if `write_data` is set to `TRUE` and `save_dir` provided.
+
+`$results$results_CART$legend_heatmap`: Legend describing row and column colors in `aurora_heatmap_CART_[date]`
+`$results$results_CART$complexity`: This data frame shows the AUC for every pair of phenotype classes as well as the most common, maximum and minimal number of splits (features) used to classify the two classes. Higher values indicate that the two classes are difficult to separate.
+
+## Outputs of function `aurora_GWAS()`
+
+`GWAS_results`: This data frame is the main output of the function. If Panaroo/Roary/PIRATE were used as an imput then the second column will contain the annotations. The next columns show the frequency of the variants in the phenotype categories. Next column contains p-values from chi-square test for each variant. Keep in min that the lowest possible p-value is 0.0005. These values do not serve as a genotype-phenotype association metric especially not when multiple phenotype classes are analysed. Next, four values for each phenotypic class are calculated; F1 Score: harmonic mean of precision and recall, Recall: true positive rate, Precision: accuracy of positive predictions, Standardized Residuals: Deviation from expected value. Only F1 Score and Standardized Residuals should be used as association metrics. See `panGWAS` vignette for more information of how to post process these values.
+
+`removed_strains`: Data frame that indicates which strains were removed prior to GWAS analysis.
+
+`bagging_results`: Data frame that shows how many times each strain was sampled by either `phylogenetic_walk` or `random_walk`.
+
+# If other mGWAS tools are used
+
+If results from `aurora_pheno()` are provided then prior to running any of these tools the mislabeled strains are removed. Otherwise not strains are removed.
+
+`results_hogwash`: Result from running [Hogwash](https://github.com/katiesaund/hogwash).
+
+`result_treeWAS`: Raw results from running [TreeWAS](https://github.com/caitiecollins/treeWAS).
+
+`result_treeWAS_ordered`: Ordered results from running TreeWAS. The p-values are converted to standard scale.
+
+If `write_data` is set to `TRUE` and `save_dir` provided then the TreeWAS results are also written `treeWAS_results_[date]`.
+If requested then binary matrices, phylogenetic trees and phenotypic matrices are written for [Scoary](https://github.com/AdmiralenOla/Scoary) and [Pyseer](https://github.com/mgalardini/pyseer). These files are correctly formatted can be used to run these tools.
+

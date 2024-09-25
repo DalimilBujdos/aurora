@@ -1,0 +1,44 @@
+Package: aurora
+Title: AUtochthonous Random fOrest Random wAlk algorithm 
+Version: 1.0.0
+Authors@R: 
+    person("Dalimil", "Bujdoš", , "dbujdos@umail.ucc.ie", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1709-8289"))
+Description: A primary goal of microbial Genome Wide Association Studies is identifying genomic variants associated with habitats. Existing tools fail to identify known causal variants if the analyzed trait (like habitat adaptation) shaped the phylogeny. Due to the presence of allochthonous strains or metadata errors  the stated sources of microbial strains in public databases are often incorrect. We developed a new tool aurora (https://github.com/DalimilBujdos/aurora) that identifies autochthonous strains and the genes associated with habitats while acknowledging the potential role of the trait in shaping the phylogeny. We successfully validated aurora by applying it to simulated datasets, and multiple species with various traits. 
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Imports: 
+    ape,
+    caret,
+    dbscan,
+    dplyr,
+    EnvStats,
+    ggplot2,
+    gplots,
+    mlrMBO,
+    phangorn,
+    phytools,
+    pROC,
+    purrr,
+    randomForest,
+    readr,
+    readxl,
+    reticulate,
+    rlist,
+    rpart,
+    stringr,
+    treeWAS
+Suggests: 
+    knitr,
+    rmarkdown,
+    xgboost,
+    proxy,
+    FactoMiner,
+    mlr
+VignetteBuilder: knitr
+BuildVignettes: true
+LazyData: true
+URL: https://github.com/DalimilBujdos/aurora, https://dalimilbujdos.github.io/aurora/
+BugReports: https://github.com/DalimilBujdos/aurora/issues

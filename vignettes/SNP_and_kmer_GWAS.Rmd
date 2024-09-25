@@ -1,0 +1,69 @@
+---
+title: "SNP_and_kmer_GWAS"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SNP_and_kmer_GWAS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  cache.lazy = FALSE
+)
+```
+
+## Introduction
+This vignette demonstrates how to configure *aurora* for k-mer and SNPs targeted mGWAS. Unlike pangenome GWAS, k-mer/SNPs mGWAS involves analyzing hundreds of thousands or even millions of variants. Many of these variants are not causal. With such a vast number of variants, *aurora* may struggle to complete the analysis in a reasonable timeframe. In this vignette, we illustrate which hyperparameters should be adjusted to reduce computational time and how to interpret results of SNPs targeted analysis.
+```{r setup}
+library(aurora)
+```
+
+## Workflow
+Let's first load some data. We will investigate association between core-genome SNPs and penicillin resistance of *Neisseria meningitidis* serogroup B. See the *aurora* paper for details of this dataset. Unlike in pangenome GWAS, the input binary matrix is not a dataframe; instead, it is a system path leading to a VCF file. *aurora* assumes that the VCF file has these columns: #CHROM, POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT and a column for each analysed strain.
+```{r}
+data("tree_neisseria")
+data("pheno_mat_neisseria")
+bin_mat_snps <- paste(system.file(package="aurora"), ".inst/extdata/neisseria_snps.vcf", sep="/")
+```
+
+Running SNPs targeted GWAS has a few caveats. First, you need to decide what SNPs you want to analyse. There are two options: "biallelic" and  "all_alleles". Setting `which_snps = "biallelic"` will remove all SNPs that have more than one alternative allele. Setting `which_snps = "all_alleles"` will create a new column for every alternative allele. A simple way to remove most non-causal SNPs is a frequency filter. We thus set `low_perc_cutoff = 5` and `upp_perc_cutoff = 95`. This will remove rare SNPs (present in less than 5% of all strains) and the most common features (present in more than 95% of all strains). We will also set `run_chisq` to TRUE and `cutoff_chisq` to 0.1. This will run chi-square test with each SNP. If the p-value of the test is higher than 0.1 (*e.g.,* the feature is uniformly distributed) then the SNP is removed.
+
+Another way to reduce the amount of analyzed variants is to group correlated SNPs. By default *aurora* uses Hamming filter to do this. Hamming filter however is more likely to collapse features with lower frequency. It thus might be beneficial to use Jaccard filter instead. Jaccard filter utilizes DBSCAN to identify the correlated variants. DBSCAN is an algorithm that may require fine tuning (parameters `minPts_val` and `eps_val`). The user thus may need to experiment with the parameters to find those that do not remove too many variants. In this case, the initial filtering removed 46858 variants, the chi-square filter removed additional 53224, Ancestral reconstruction filter removed 291 variants and Jaccard filter with the default parameters collapsed 2396 variants. The number of variants was reduced to 7174.
+```{r, eval = FALSE}
+results <- aurora_pheno(pheno_mat = pheno_mat,
+                        bin_mat = bin_mat_snps,
+                        type_bin_mat = "SNPs",
+                        which_snps = "all_alleles",
+                        tree = tree,
+                        low_perc_cutoff = 5,
+                        upp_perc_cutoff = 95,
+                        jaccard_filter = TRUE,
+                        run_chisq = TRUE,
+                        cutoff_chisq = 0.1,
+                        write_data = FALSE)
+
+```
+
+The function above will not be run because it takes a few hours to finish. Let's load the precalculated results and run `aurora_GWAS`.
+```{r}
+data("aurora_pheno_results_neisseria") # load the precalculated results
+res <- aurora_GWAS(bin_mat = bin_mat_snps,
+                   type_bin_mat = "SNPs",
+                   pheno_mat = pheno_mat,
+                   tree = tree,
+                   aurora_results = results,
+                   mode = "consensus",
+                   write_data = FALSE)
+```
+The results are the same as in pangenome GWAS except the unique identifiers. The identifier of SNP is a combination of the contig identifier (*i.e.,* gnl_funcentre_CHJKMJOA_1) and the position in the contig (*i.e.,* 10560). Let's print the top 5 SNPs associated with the resistant phenotype.
+```{r}
+res$GWAS_results <- res$GWAS_results[order(res$GWAS_results$`resistant std_residual`, decreasing = TRUE),]
+knitr::kable(res$GWAS_results[1:5,c(1,9)], format = "html", table.attr = "class='table table-striped'")
+```
+These are all in the same contig and around the same locus. In the next step we could construct a Manhattan plot using for example [Phandango](https://jameshadfield.github.io/phandango/#/).
