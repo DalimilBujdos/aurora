@@ -114,6 +114,19 @@ aurora_GWAS <- function(pheno_mat,
   # prepare pheno_mat
   pheno_mat <- as.data.frame(pheno_mat)
   names(pheno_mat) <- c("ids", "pheno")
+  # check that the classes are roughly balanced and that we have enough strains to run the analysis
+  pheno_tbl <- as.data.frame(table(pheno_mat$pheno))
+  if (any(pheno_tbl$Freq < 20)) {
+    warning("Some phenotype categories have less than 20 strains. In such case results from aurora_pheno() may not be reliable.")
+  }
+
+  maxi <- pheno_tbl$Freq[which.max(pheno_tbl$Freq)]
+  pheno_tbl$Freq <- maxi/pheno_tbl$Freq
+
+  if (any(pheno_tbl$Freq < 20)) {
+    warning("The number of strains in phenotype categories is not balanced. In such case results from aurora_pheno() may not be reliable.")
+  }
+
   # remove the strains that the user requested now if the aurora results were not provided
   if (!is.list(aurora_results) & is.character(remove_strains)) {
     if (write_data == TRUE) {

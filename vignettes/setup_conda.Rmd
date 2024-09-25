@@ -17,6 +17,7 @@ knitr::opts_chunk$set(
   cache.lazy = FALSE
 )
 ```
+
 This vignette demonstrates how to set up conda environment for *aurora*. This will allow you to use log regression and AdaBoost in function `aurora_pheno()`. The function that sets up the environment (`setup_conda()`) has no input and only one output which is the path to the conda environment. This path then has to be specified in function `aurora_pheno()`.
 ```{r, eval = FALSE}
 library(aurora)

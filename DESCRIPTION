@@ -1,6 +1,6 @@
 Package: aurora
 Title: AUtochthonous Random fOrest Random wAlk algorithm 
-Version: 1.0.0.
+Version: 1.0.0
 Authors@R: 
     person("Dalimil", "Bujdoš", , "dbujdos@umail.ucc.ie", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1709-8289"))

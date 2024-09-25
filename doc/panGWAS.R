@@ -15,8 +15,9 @@ library(ape)
 library(gplots)
 
 ## -----------------------------------------------------------------------------
-#save_dir <- "/path/to/your/dir/"
+save_dir <- "/path/to/your/dir/"
 
+# this line will not be run because you do not want a vignette to create folders
 #if (!dir.exists(save_dir)) {dir.create(save_dir)}
 
 data("pheno_mat_reuteri") # loads the phenotype for each strain
@@ -27,6 +28,7 @@ data("tree_reuteri") # loads the core-genome phylogenetic tree
 #  # I want to use all ML algorithmns
 #  results <- aurora_pheno(pheno_mat = pheno_mat,
 #                          bin_mat = bin_mat,
+#                          type_bin_mat = "panaroo",
 #                          tree = tree,
 #                          condaenv_path = "/path/to/conda/env", # an example of a path to conda environment
 #                          save_dir = save_dir)
@@ -34,6 +36,7 @@ data("tree_reuteri") # loads the core-genome phylogenetic tree
 #  # I don't want to use AdaBoost and log regression
 #  results <- aurora_pheno(pheno_mat = pheno_mat,
 #                          bin_mat = bin_mat,
+#                          type_bin_mat = "panaroo",
 #                          tree = tree,
 #                          save_dir = save_dir)
 #  # lets also save the final list for GWAS analysis later
@@ -43,6 +46,7 @@ data("tree_reuteri") # loads the core-genome phylogenetic tree
 data("aurora_pheno_results_reuteri") # these are only truncated results!
 
 ## -----------------------------------------------------------------------------
+par(mar = c(10, 10, 1, 1))
 func <- function(x) {
   # this function will make the results look prettier
   if (is.na(x)) {
@@ -69,7 +73,11 @@ heatmap.2(mat,
           cellnote=mat,
           notecol="black",
           density.info="none",
-          key = FALSE)
+          key = FALSE,
+          Rowv = FALSE,
+          Colv = FALSE,
+          cexRow = 0.7,
+          cexCol = 0.7)
 
 mat <- apply(results$results$results_adaboost$p_val_mat,
              c(1,2), func)
@@ -79,7 +87,11 @@ heatmap.2(mat,
           cellnote=mat,
           notecol="black",
           density.info="none",
-          key = FALSE)
+          key = FALSE,
+          Rowv = FALSE,
+          Colv = FALSE,
+          cexRow = 0.7,
+          cexCol = 0.7)
 
 mat <- apply(results$results$results_log_reg$p_val_mat,
              c(1,2), func)
@@ -89,7 +101,11 @@ heatmap.2(mat,
           cellnote=mat,
           notecol="black",
           density.info="none",
-          key = FALSE)
+          key = FALSE,
+          Rowv = FALSE,
+          Colv = FALSE,
+          cexRow = 0.7,
+          cexCol = 0.7)
 
 mat <- apply(results$results$results_CART$p_val_mat,
              c(1,2), func)
@@ -99,7 +115,11 @@ heatmap.2(mat,
           cellnote=mat,
           notecol="black",
           density.info="none",
-          key = FALSE)
+          key = FALSE,
+          Rowv = FALSE,
+          Colv = FALSE,
+          cexRow = 0.7,
+          cexCol = 0.7)
 
 
 ## -----------------------------------------------------------------------------
@@ -110,11 +130,12 @@ plot(results$results$results_log_reg$aucs, ylim = c(0,1), main = "Log reg AUCs")
 ## -----------------------------------------------------------------------------
 barplot(results$results$results_CART$complexity$AUC, names.arg = results$results$results_CART$complexity$classes, main = "CART AUCs", horiz = T, las = 1)
 
-## ----eval = FALSE-------------------------------------------------------------
-#  results$results$results_random_forest$plot
-#  results$results$results_adaboost$plot
-#  results$results$results_log_reg$plot
-#  results$results$results_CART$plot
+## -----------------------------------------------------------------------------
+# These results are truncated to only the first 10 strains
+knitr::kable(results$results$results_random_forest$auto_allo_results, format = "html", table.attr = "class='table table-striped'")
+knitr::kable(results$results$results_adaboost$auto_allo_results, format = "html", table.attr = "class='table table-striped'")
+knitr::kable(results$results$results_log_reg$auto_allo_results, format = "html", table.attr = "class='table table-striped'")
+knitr::kable(results$results$results_CART$auto_allo_results, format = "html", table.attr = "class='table table-striped'")
 
 ## -----------------------------------------------------------------------------
 # Get all non-typical rodent strains identified by Random Forest
@@ -124,6 +145,7 @@ ids_rf_not_typ <- res_rf_rodent$strain_ids[grepl("not typical", res_rf_rodent$ro
 
 # Run GWAS analysis
 res <- aurora_GWAS(bin_mat = bin_mat,
+                   type_bin_mat = "panaroo",
                    pheno_mat = pheno_mat,
                    tree = tree,
                    remove_strains = ids_rf_not_typ,
@@ -138,14 +160,15 @@ GWAS_rodent <- res$GWAS_results
 GWAS_rodent <- GWAS_rodent[order(GWAS_rodent$`rodent std_residual`, decreasing = TRUE), ]
 GWAS_rodent$rank <- rank(1-GWAS_rodent$`rodent std_residual`, ties.method = "average")
 # Print the rank of the known colonization factors
-index <- grepl("ure", GWAS_rodent$gene_family) |
-  GWAS_rodent$gene_family == "group_2460"
-GWAS_rodent[index, c(1,28)]
+index <- grepl("ure", GWAS_rodent$Variant) | GWAS_rodent$Variant == "group_2460"
+knitr::kable(GWAS_rodent[index, c(1,29)], format = "html", table.attr = "class='table table-striped'")
 
 ## -----------------------------------------------------------------------------
 GWAS_human <- res$GWAS_results
 GWAS_human <- GWAS_human[GWAS_human$`homo sapiens precision` > 0.4, ]
 GWAS_human <- GWAS_human[order(GWAS_human$`homo sapiens F1`, decreasing = TRUE), ]
 # print the top 10 human colonization factors
-head(GWAS_human[,c(1,19)], n = 10)
+
+index <- grepl("ure", GWAS_rodent$Variant) | GWAS_rodent$Variant == "group_2460"
+knitr::kable(GWAS_human[1:10,c(1,20)], format = "html", table.attr = "class='table table-striped'")
 

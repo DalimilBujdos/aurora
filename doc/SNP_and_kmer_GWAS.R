@@ -18,7 +18,8 @@ bin_mat_snps <- paste(system.file(package="aurora"), ".inst/extdata/neisseria_sn
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  results <- aurora_pheno(pheno_mat = pheno_mat,
-#                          bin_mat_snps = bin_mat_snps,
+#                          bin_mat = bin_mat_snps,
+#                          type_bin_mat = "SNPs",
 #                          which_snps = "all_alleles",
 #                          tree = tree,
 #                          low_perc_cutoff = 5,
@@ -26,21 +27,20 @@ bin_mat_snps <- paste(system.file(package="aurora"), ".inst/extdata/neisseria_sn
 #                          jaccard_filter = TRUE,
 #                          run_chisq = TRUE,
 #                          cutoff_chisq = 0.1,
-#                          condaenv_path = "/path/to/conda/env",
 #                          write_data = FALSE)
 #  
 
-## ----eval = FALSE-------------------------------------------------------------
-#  data("aurora_pheno_results_neisseria")
-#  res <- aurora_GWAS(bin_mat_snps = bin_mat_snps,
-#                     pheno_mat = pheno_mat,
-#                     tree = tree,
-#                     aurora_results = results,
-#                     mode = "consensus",
-#                     write_data = FALSE)
+## -----------------------------------------------------------------------------
+data("aurora_pheno_results_neisseria") # load the precalculated results
+res <- aurora_GWAS(bin_mat = bin_mat_snps,
+                   type_bin_mat = "SNPs",
+                   pheno_mat = pheno_mat,
+                   tree = tree,
+                   aurora_results = results,
+                   mode = "consensus",
+                   write_data = FALSE)
 
-## ----eval = FALSE-------------------------------------------------------------
-#  res$GWAS_results <- res$GWAS_results[order(res$GWAS_results$`resistant std_residual`, decreasing = TRUE),]
-#  
-#  head(res$GWAS_results[,c(9:12)], 5)
+## -----------------------------------------------------------------------------
+res$GWAS_results <- res$GWAS_results[order(res$GWAS_results$`resistant std_residual`, decreasing = TRUE),]
+knitr::kable(res$GWAS_results[1:5,c(1:4,9)], format = "html", table.attr = "class='table table-striped'")
 

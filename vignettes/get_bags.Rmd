@@ -19,9 +19,12 @@ knitr::opts_chunk$set(
 ```
 ## Introduction
 In this vignette we will explore the function `get_bags()`. This function is used internally in both `aurora_pheno()` and `aurora_GWAS()` but can be also accessed directly upon installing *aurora*. The function takes a dataset of microbial strains and returns a bootstrapped dataset that is adjusted for population structure. `get_bags()` has many possible uses and we will demonstrate a few here.
+
 ## Description of function `get_bags()`
 This function requires two inputs. The phenotype matrix (`pheno_mat`) which has to be in the same format as the one used in `aurora_pheno()` and `aurora_GWAS()` and a phylogenetic reconstruction. This can be either a phylogenetic tree loaded as a phylo object or a distance matrix that contains phylogenetic pairwise distances (core genome amino acid identities (cAAI) or average nucleotide identities (ANI) converted to distances).
+
 ## Objective
+
 Example 1: `aurora_pheno()` uses a grid search to fine-tune hyperparameters for Random Forest and AdaBoost. However, this process is very time consuming. Additionally, the user is only restricted to the parameters that are in the grid that `aurora_pheno()` uses (see supplementary materials in the *aurora* paper). However, you can use `get_bags()` to get adjusted datasets and then use your favorite hyperparameter search method to get the best results.
 
 Example 2: `aurora_pheno()` uses four machine learning algorithms to identify the mislabeled strains. However, these machine learning algorithms may not be optimal for your dataset and you may want to explore other options. Machine learning algorithms often learn the phylogenetic background rather than the existing causal features. To minimize this issue we will first use `get_bags()` to obtain multiple bootstrapped datasets that are adjusted for phylogenetic non-independence and then construct corresponding XGBoost models. The results from these models will be combined to obtain the most probable causal features and to identify potentially mislabeled strains (a simple implementation of `aurora_pheno()` and `aurora_GWAS()`). 
@@ -191,7 +194,8 @@ for (i in 1:nrow(features)) {
 }
 features <- features[order(features$Freq, features$importance, decreasing = TRUE), ]
 colnames(features) <- c("Gene", "Frequence", "Importance")
-# plot the top 15 features along with their frequences in the 10 models and the median of their importances
+# print the top 15 features along with their frequences in the 10 models and the median of their importances
+knitr::kable(features[1:15,], format = "html", table.attr = "class='table table-striped'")
 head(features, 15)
 ```
 These results contain some of the experimentally confirmed rodent colonization factors and we can thus conclude that the models (at least partially) were able to identify causal features. In the next cell, we will plot the classification probabilities. This will allow us to identify strains that might be mislabeled. 
@@ -206,6 +210,7 @@ ggplot(df_probs, aes(x = 1:nrow(df_probs), y = probs_med, color = host)) +
        color = "Host")
 
 ```
+
 Assuming that the model does not overfit or underfit we would conclude that the majority of *L. reuteri* rodent strains are autochthonous in the host while a few strains appear to be mislabeled. For more thorough discussion on *L. reuteri* adaptation mechanisms see the main *aurora* manuscript.
 
 # Example 3:
@@ -241,6 +246,7 @@ ggplot(pca_coordinates, aes(x = Dim.1, y = Dim.2, color = host)) +
   labs(title = "PCA adjusted", x = "PC1", y = "PC2") +
   theme_minimal()
 ```
+
 The unadjusted plot is not as well separated as the adjusted plot. Specifically, the porcine strains are intermixed with poultry strains in the unadjusted plot. As we show in the main *aurora* paper, isolates from these two hosts are actually very distinct from each other but the unadjusted analysis does not communicate this well.
 
 

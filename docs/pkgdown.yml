@@ -8,7 +8,7 @@ articles:
   panGWAS_with_large_dataset: panGWAS_with_large_dataset.html
   setup_conda: setup_conda.html
   SNP_and_kmer_GWAS: SNP_and_kmer_GWAS.html
-last_built: 2024-09-23T21:18Z
+last_built: 2024-09-25T22:20Z
 urls:
   reference: https://dalimilbujdos.github.io/aurora/reference
   article: https://dalimilbujdos.github.io/aurora/articles

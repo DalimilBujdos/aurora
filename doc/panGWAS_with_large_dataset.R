@@ -50,6 +50,7 @@ res <- aurora_GWAS(bin_mat = bin_mat,
 #  
 #  aurora_pheno(pheno_mat = pheno_mat,
 #               bin_mat = bin_mat,
+#               type_bin_mat = "custom",
 #               tree = tree,
 #               bag_size = unname(bag_size),
 #               bagging = "random_walk", # use random walk which is faster than phylogenetic walk

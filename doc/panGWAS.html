@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -342,45 +342,53 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>Pangenome GWAS (panGWAS) is a genetic analysis method that
-investigates the relationship between genetic variations (genes in this
-case) across an entire species’ genome and observable traits. PanGWAS
-relies on the construction of pangenomes and phylogenetic trees which
-are the main input into the analysis. ## Objective In this vignette you
-will be introduced to the most common use case of <em>aurora</em>
-package. You will try to find out if <em>Limosilactobacillus
-reuteri</em> is a host adapted species. To this end you will use an
-output from Panaroo (pangenome tool) run with 207 <em>L. reuteri</em>
-assemblies downloaded from NCBI and a core-genome phylogenetic tree
-constructed using IQ-TREE. In the end you will identify some of the
-genes that allow <em>L. reuteri</em> to colonize the rodent
-gastrointestinal tract. ## Workflow First, let’s install and attach all
-the packages we will need for this vignette.</p>
+<p>Pangenome GWAS (panGWAS) is an analysis method that investigates the
+relationship between genes in species’ genofond and observable traits.
+PanGWAS relies on the construction of pangenomes and phylogenetic trees
+which are the main input into the analysis.</p>
+</div>
+<div id="objective" class="section level2">
+<h2>Objective</h2>
+<p>In this vignette you will be introduced to the most common use case
+of <em>aurora</em> package. You will try to find out if
+<em>Limosilactobacillus reuteri</em> is a host adapted species. To this
+end you will use an output from Panaroo (pangenome tool) run with 207
+<em>L. reuteri</em> assemblies downloaded from NCBI and a core-genome
+phylogenetic tree constructed using IQ-TREE. In the end you will
+identify some of the genes that allow <em>L. reuteri</em> to colonize
+the rodent gastrointestinal tract.</p>
+</div>
+<div id="workflow" class="section level2">
+<h2>Workflow</h2>
+<p>First, let’s install and attach all the packages we will need for
+this vignette.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(aurora)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(ape)</span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">library</span>(gplots)</span></code></pre></div>
 <p>Next let’s load all the data and also create the directory where the
 output will be stored.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co">#save_dir &lt;- &quot;/path/to/your/dir/&quot;</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>save_dir <span class="ot">&lt;-</span> <span class="st">&quot;/path/to/your/dir/&quot;</span></span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#if (!dir.exists(save_dir)) {dir.create(save_dir)}</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;pheno_mat_reuteri&quot;</span>) <span class="co"># loads the phenotype for each strain</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;bin_mat_reuteri&quot;</span>) <span class="co"># loads the pangenome matrix</span></span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;tree_reuteri&quot;</span>) <span class="co"># loads the core-genome phylogenetic tree</span></span></code></pre></div>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co"># this line will not be run because you do not want a vignette to create folders</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#if (!dir.exists(save_dir)) {dir.create(save_dir)}</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;pheno_mat_reuteri&quot;</span>) <span class="co"># loads the phenotype for each strain</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;bin_mat_reuteri&quot;</span>) <span class="co"># loads the pangenome matrix</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;tree_reuteri&quot;</span>) <span class="co"># loads the core-genome phylogenetic tree</span></span></code></pre></div>
 <p>You need to make sure that all strains in <code>pheno_mat</code> are
 also in the bin_mat and in the tree. Additionally, the strain names
 should contain only letters, numbers and special signs “<em>”, ”.”. A
 strain name cannot start with ”.” or ”</em>”. Now, the main
 <em>aurora</em> function will be executed. This function does not do any
-GWAS analysis. The only purpose of it is to find if the species is
+GWAS analysis. The only purpose of it is to find out if the species is
 adapted to the supplied phenotype and find which strains are mislabelled
 (allochthonous strains). If you don’t want to run it, you can skip this
-step and run only <code>aurora_GWAS()</code>. The <em>L. reuteri</em> is
-a medium-size dataset, and thus there is no need to change any
-parameters to optimize <em>aurora’s</em> performance. Still it might
-take a few hours for <code>aurora_pheno()</code> to finish. By default
+step and run only <code>aurora_GWAS()</code>.</p>
+<p>The <em>L. reuteri</em> is a medium-size dataset, and thus there is
+no need to change any parameters to optimize <em>aurora’s</em>
+performance. Still it might take a few hours for
+<code>aurora_pheno()</code> to finish. By default
 <code>aurora_pheno()</code> runs with all machine learning (ML)
 algorithms. Python functions are used to run AdaBoost and log
 regression. For this reason, one needs to set up a conda environment.
@@ -393,17 +401,19 @@ regression will not be run.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># I want to use all ML algorithmns</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">aurora_pheno</span>(<span class="at">pheno_mat =</span> pheno_mat,</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                        <span class="at">bin_mat =</span> bin_mat,</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                        <span class="at">condaenv_path =</span> <span class="st">&quot;/path/to/conda/env&quot;</span>, <span class="co"># an example of a path to conda environment</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                        <span class="at">save_dir =</span> save_dir)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># I don&#39;t want to use AdaBoost and log regression</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">aurora_pheno</span>(<span class="at">pheno_mat =</span> pheno_mat,</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                        <span class="at">bin_mat =</span> bin_mat,</span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                        <span class="at">save_dir =</span> save_dir)</span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co"># lets also save the final list for GWAS analysis later</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="fu">save</span>(results, <span class="at">file =</span> <span class="fu">paste0</span>(save_dir, <span class="st">&quot;results_aurora.Rdata&quot;</span>))</span></code></pre></div>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        <span class="at">type_bin_mat =</span> <span class="st">&quot;panaroo&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                        <span class="at">condaenv_path =</span> <span class="st">&quot;/path/to/conda/env&quot;</span>, <span class="co"># an example of a path to conda environment</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                        <span class="at">save_dir =</span> save_dir)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co"># I don&#39;t want to use AdaBoost and log regression</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">aurora_pheno</span>(<span class="at">pheno_mat =</span> pheno_mat,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                        <span class="at">bin_mat =</span> bin_mat,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                        <span class="at">type_bin_mat =</span> <span class="st">&quot;panaroo&quot;</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>                        <span class="at">save_dir =</span> save_dir)</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co"># lets also save the final list for GWAS analysis later</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="fu">save</span>(results, <span class="at">file =</span> <span class="fu">paste0</span>(save_dir, <span class="st">&quot;results_aurora.Rdata&quot;</span>))</span></code></pre></div>
 <p>Since running the function will take a few hours lets load the
 precalculated results.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;aurora_pheno_results_reuteri&quot;</span>) <span class="co"># these are only truncated results!</span></span></code></pre></div>
@@ -431,46 +441,51 @@ analysed phenotype classes (phenotypes for short).
 <code>results$abundance_filter_removed</code>,
 <code>results$acr_filter_removed</code> and
 <code>results$hamming_filter_removed</code> contains the number of
-features that these filter removed or collapsed.
+features that these filters removed or collapsed.
 <code>results$plot_acr_cutoff</code> contains a histogram that shows how
 the cutoff for the ancestral reconstruction filter
 (<code>ancest_rec_filter</code>).
 <code>results$pairwise_dist_outlier</code> contains a histogram that
 shows the cutoff applied for <code>reduce_oulier</code>. The fitted
 parameters for AdaBoost and Random Forest can be found in
-<code>results$fitted_parameters</code>. The most important objects are
-stored in <code>results$results$</code>. The complete list of what this
-part of the output contains is in <code>?aurora_pheno()</code>. Let’s
-explore the main objects. First, the p-value matrices should be
-examined.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>func <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="co"># this function will make the results look prettier</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(x)) {</span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>    <span class="fu">return</span>(<span class="cn">NA</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>  }</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>   <span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">0</span>) {</span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">0</span>)</span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>  }</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="cf">while</span> (x<span class="sc">*</span>y <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> x<span class="sc">*</span>y <span class="sc">&gt;</span> <span class="dv">10</span>) {</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    y <span class="ot">&lt;-</span> y <span class="sc">*</span> <span class="dv">10</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>  }</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x <span class="sc">*</span> y</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  x_rounded <span class="ot">&lt;-</span> <span class="fu">round</span>(x, <span class="dv">2</span>)</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  x_final <span class="ot">&lt;-</span> x_rounded <span class="sc">/</span> y</span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  <span class="fu">return</span>(x_final)</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>}</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">apply</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>p_val_mat,</span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>             <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), func)</span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="fu">heatmap.2</span>(mat,</span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>          <span class="at">trace =</span> <span class="st">&quot;none&quot;</span>,</span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>          <span class="at">dendrogram =</span> <span class="st">&quot;none&quot;</span>,</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>          <span class="at">cellnote=</span>mat,</span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>          <span class="at">notecol=</span><span class="st">&quot;black&quot;</span>,</span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>          <span class="at">density.info=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<code>results$fitted_parameters</code>.</p>
+<p>The most important objects are stored in
+<code>results$results$</code>. The complete list of what this part of
+the output contains is in <code>?aurora_pheno()</code>. Let’s explore
+the main objects. First, the p-value matrices should be examined.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mar =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>func <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>  <span class="co"># this function will make the results look prettier</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(x)) {</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>    <span class="fu">return</span>(<span class="cn">NA</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>  }</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>   <span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">0</span>) {</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">0</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>  }</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  y <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>  <span class="cf">while</span> (x<span class="sc">*</span>y <span class="sc">&lt;</span> <span class="dv">1</span> <span class="sc">||</span> x<span class="sc">*</span>y <span class="sc">&gt;</span> <span class="dv">10</span>) {</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    y <span class="ot">&lt;-</span> y <span class="sc">*</span> <span class="dv">10</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>  }</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>  x <span class="ot">&lt;-</span> x <span class="sc">*</span> y</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>  x_rounded <span class="ot">&lt;-</span> <span class="fu">round</span>(x, <span class="dv">2</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>  x_final <span class="ot">&lt;-</span> x_rounded <span class="sc">/</span> y</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>  <span class="fu">return</span>(x_final)</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>}</span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">apply</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>p_val_mat,</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>             <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), func)</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="fu">heatmap.2</span>(mat,</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>          <span class="at">trace =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>          <span class="at">dendrogram =</span> <span class="st">&quot;none&quot;</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>          <span class="at">cellnote=</span>mat,</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>          <span class="at">notecol=</span><span class="st">&quot;black&quot;</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>          <span class="at">density.info=</span><span class="st">&quot;none&quot;</span>,</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a>          <span class="at">Rowv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>          <span class="at">Colv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>          <span class="at">cexRow =</span> <span class="fl">0.7</span>,</span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>          <span class="at">cexCol =</span> <span class="fl">0.7</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a></span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">apply</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_adaboost<span class="sc">$</span>p_val_mat,</span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>             <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), func)</span>
@@ -480,8 +495,12 @@ examined.</p>
 <span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>          <span class="at">cellnote=</span>mat,</span>
 <span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>          <span class="at">notecol=</span><span class="st">&quot;black&quot;</span>,</span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>          <span class="at">density.info=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>          <span class="at">Rowv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>          <span class="at">Colv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>          <span class="at">cexRow =</span> <span class="fl">0.7</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>          <span class="at">cexCol =</span> <span class="fl">0.7</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a></span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">apply</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_log_reg<span class="sc">$</span>p_val_mat,</span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>             <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), func)</span>
@@ -491,8 +510,12 @@ examined.</p>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>          <span class="at">cellnote=</span>mat,</span>
 <span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>          <span class="at">notecol=</span><span class="st">&quot;black&quot;</span>,</span>
 <span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>          <span class="at">density.info=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>          <span class="at">Rowv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>          <span class="at">Colv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>          <span class="at">cexRow =</span> <span class="fl">0.7</span>,</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>          <span class="at">cexCol =</span> <span class="fl">0.7</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>mat <span class="ot">&lt;-</span> <span class="fu">apply</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_CART<span class="sc">$</span>p_val_mat,</span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>             <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>), func)</span>
@@ -502,8 +525,12 @@ examined.</p>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>          <span class="at">cellnote=</span>mat,</span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>          <span class="at">notecol=</span><span class="st">&quot;black&quot;</span>,</span>
 <span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>          <span class="at">density.info=</span><span class="st">&quot;none&quot;</span>,</span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>          <span class="at">key =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>          <span class="at">Rowv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>          <span class="at">Colv =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>          <span class="at">cexRow =</span> <span class="fl">0.7</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>          <span class="at">cexCol =</span> <span class="fl">0.7</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>When two p-values (x -&gt; y and y -&gt; x) are both above 0.05 then
 the two phenotype classes should be considered indistinguishable and
 vice versa when at least one pairwise p-value is below 0.05 then there
@@ -526,36 +553,1299 @@ median of all runs for each pair of phenotype classes is calculated.</p>
 <p>You can see that even a simple CART model does a pretty good job on
 this dataset, and all class pairs are close to 1. The fact that a
 classifier performs well on a dataset does not mean that there are no
-mislabelled strains. You can examine the figures stored in “plot”
-variable to see the summary of labels predicted by each classifier.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>plot</span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>results<span class="sc">$</span>results<span class="sc">$</span>results_adaboost<span class="sc">$</span>plot</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>results<span class="sc">$</span>results<span class="sc">$</span>results_log_reg<span class="sc">$</span>plot</span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>results<span class="sc">$</span>results<span class="sc">$</span>results_CART<span class="sc">$</span>plot</span></code></pre></div>
+mislabelled strains. You can examine all predicted labels in the
+<code>auto_allo_results</code> object.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># These results are truncated to only the first 10 strains</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>auto_allo_results, <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+strain_ids
+</th>
+<th style="text-align:left;">
+poultry
+</th>
+<th style="text-align:left;">
+rodent
+</th>
+<th style="text-align:left;">
+homo sapiens
+</th>
+<th style="text-align:left;">
+pig
+</th>
+<th style="text-align:left;">
+primate
+</th>
+<th style="text-align:left;">
+predicted
+</th>
+<th style="text-align:left;">
+observed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_adaboost<span class="sc">$</span>auto_allo_results, <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+strain_ids
+</th>
+<th style="text-align:left;">
+poultry
+</th>
+<th style="text-align:left;">
+rodent
+</th>
+<th style="text-align:left;">
+homo sapiens
+</th>
+<th style="text-align:left;">
+pig
+</th>
+<th style="text-align:left;">
+primate
+</th>
+<th style="text-align:left;">
+predicted
+</th>
+<th style="text-align:left;">
+observed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+INCONCLUSIVE
+</td>
+<td style="text-align:left;">
+INCONCLUSIVE or pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_log_reg<span class="sc">$</span>auto_allo_results, <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+strain_ids
+</th>
+<th style="text-align:left;">
+poultry
+</th>
+<th style="text-align:left;">
+rodent
+</th>
+<th style="text-align:left;">
+homo sapiens
+</th>
+<th style="text-align:left;">
+pig
+</th>
+<th style="text-align:left;">
+primate
+</th>
+<th style="text-align:left;">
+predicted
+</th>
+<th style="text-align:left;">
+observed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry not typical
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent not typical
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent not typical
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent not typical
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE not typical
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig not typical
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(results<span class="sc">$</span>results<span class="sc">$</span>results_CART<span class="sc">$</span>auto_allo_results, <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+strain_ids
+</th>
+<th style="text-align:left;">
+poultry
+</th>
+<th style="text-align:left;">
+rodent
+</th>
+<th style="text-align:left;">
+homo sapiens
+</th>
+<th style="text-align:left;">
+pig
+</th>
+<th style="text-align:left;">
+primate
+</th>
+<th style="text-align:left;">
+predicted
+</th>
+<th style="text-align:left;">
+observed
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+GCA_025369755.1_ASM2536975v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent or poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622285.1_ASM2462228v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622305.1_ASM2462230v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_024622315.1_ASM2462231v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_025189695.1_ASM2518969v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+<td style="text-align:left;">
+homo sapiens
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002159305.1_ASM215930v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_002160565.1_ASM216056v1_genomic
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+<td style="text-align:left;">
+poultry
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022786355.1_ASM2278635v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022780645.1_ASM2278064v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+pig
+</td>
+<td style="text-align:left;">
+pig
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GCA_022511545.1_ASM2251154v1_genomic
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+TRUE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+<td style="text-align:left;">
+rodent
+</td>
+</tr>
+</tbody>
+</table>
 <p>It seems that each algorithm identified only a few strains that are
 mislabelled. This is another indication that the species is adapted to
 the habitat. However, log regression identified the most mislabelled
-strains. We can examine which strains were removed by looking at the
-data frame in
-<code>results$results$results_log_reg$auto_allo_results</code>. If
-results from one algorithm are different than the rest of the
-algorithms, we can choose not to use the results in the subsequent GWAS
-analysis. Another reason why you may want to omit some algorithms is
-that p-value matrix from a ML algorithm shows that the species is not
+strains. If results from one algorithm are different than the rest of
+the algorithms, we can choose not to use the results in the subsequent
+GWAS analysis. Another reason why you may want to omit some algorithms
+is that p-value matrix from a ML algorithm shows that the species is not
 adapted and it contradicts results of other ML algorithms. Such a model
 may just have a high variance because it was overfitted. Also, if the
 AUCs of a ML algorithm are much lower than AUCs of others it might mean
 that the model is not complex enough (e.g., it has high bias) and the
-algorithm should be omitted. In the example below we run the GWAS
-analysis without log regression. Phylogenetic <code>tree</code>,
-<code>bin_mat</code> and <code>pheno_mat</code> needs to be provided
-again. As we show in the <em>aurora</em> paper there are some rodent
-isolates that appear to be able to colonize primate gut as well. To
-identify the primate colonization factors these strains needs to be
-removed. All these <em>L. reuteri</em> strains were labelled as
-non-typical by Random Forest. We can thus easily identify them and
-remove them (argument <code>remove_strains</code>). Alternatively, you
-can also choose to remove all non-typical strains by setting
+algorithm should be omitted.</p>
+<p>In the example below we run the GWAS analysis without log regression.
+Phylogenetic <code>tree</code>, <code>bin_mat</code> and
+<code>pheno_mat</code> needs to be provided again. As we show in the
+<em>aurora</em> paper there are some rodent isolates that appear to be
+able to colonize primate gut as well. To identify the exclusively
+primate colonization factors these strains needs to be removed. All
+these <em>L. reuteri</em> strains were labelled as non-typical by Random
+Forest. We can thus easily identify them and remove them (argument
+<code>remove_strains</code>). Alternatively, you can also choose to
+remove all non-typical strains by setting
 <code>rm_non_typical = TRUE</code>. <code>aurora_GWAS()</code> is a
 function with many parameters but one of the most important that the
 user should pay attention to is the <code>mode</code>. The mode of
@@ -564,25 +1854,27 @@ first named always removes less strains than “strict” mode. Consensus
 mode removes only strains that were identified as allochthonous by all
 ML algorithms used. On the other hand, strict mode removes a strain if
 it was identified as mislabelled by at least one ML algorithm.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Get all non-typical rodent strains identified by Random Forest</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>res_rf <span class="ot">&lt;-</span> results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>auto_allo_results</span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>res_rf_rodent <span class="ot">&lt;-</span> res_rf[res_rf<span class="sc">$</span>observed <span class="sc">==</span> <span class="st">&quot;rodent&quot;</span>, ]</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>ids_rf_not_typ <span class="ot">&lt;-</span> res_rf_rodent<span class="sc">$</span>strain_ids[<span class="fu">grepl</span>(<span class="st">&quot;not typical&quot;</span>, res_rf_rodent<span class="sc">$</span>rodent)]</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co"># Run GWAS analysis</span></span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">aurora_GWAS</span>(<span class="at">bin_mat =</span> bin_mat,</span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a>                   <span class="at">pheno_mat =</span> pheno_mat,</span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a>                   <span class="at">tree =</span> tree,</span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a>                   <span class="at">remove_strains =</span> ids_rf_not_typ,</span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a>                   <span class="at">aurora_results =</span> results,</span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>                   <span class="at">mode =</span> <span class="st">&quot;consensus&quot;</span>,</span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a>                   <span class="at">use_log =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#&gt; 5 branches were identified as outliers. These branches were reduced </span></span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#&gt; Random forest removes 0 strains </span></span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; Adaboost removes 1 strains </span></span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; CART removes 1 strains </span></span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; Consensus mode removed in total 0 strains. There are 207 strains left.</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Get all non-typical rodent strains identified by Random Forest</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>res_rf <span class="ot">&lt;-</span> results<span class="sc">$</span>results<span class="sc">$</span>results_random_forest<span class="sc">$</span>auto_allo_results</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>res_rf_rodent <span class="ot">&lt;-</span> res_rf[res_rf<span class="sc">$</span>observed <span class="sc">==</span> <span class="st">&quot;rodent&quot;</span>, ]</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>ids_rf_not_typ <span class="ot">&lt;-</span> res_rf_rodent<span class="sc">$</span>strain_ids[<span class="fu">grepl</span>(<span class="st">&quot;not typical&quot;</span>, res_rf_rodent<span class="sc">$</span>rodent)]</span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co"># Run GWAS analysis</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">aurora_GWAS</span>(<span class="at">bin_mat =</span> bin_mat,</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>                   <span class="at">type_bin_mat =</span> <span class="st">&quot;panaroo&quot;</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>                   <span class="at">pheno_mat =</span> pheno_mat,</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>                   <span class="at">tree =</span> tree,</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a>                   <span class="at">remove_strains =</span> ids_rf_not_typ,</span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>                   <span class="at">aurora_results =</span> results,</span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a>                   <span class="at">mode =</span> <span class="st">&quot;consensus&quot;</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a>                   <span class="at">use_log =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co">#&gt; 5 branches were identified as outliers. These branches were reduced </span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="co">#&gt; Random forest removes 0 strains </span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="co">#&gt; Adaboost removes 1 strains </span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co">#&gt; CART removes 1 strains </span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co">#&gt; Consensus mode removed in total 0 strains. There are 207 strains left. </span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#&gt; Finished</span></span></code></pre></div>
 <p>The removed strains are in <code>res$removed_strains</code> but the
 main results are in <code>res$GWAS_results</code>. This data frame
 contains precision, recall, F1 values and standardized residuals for
@@ -591,66 +1883,278 @@ highest F1 value and standardized residual. The colonization factors of
 rodent gut are well known. It is the urease operon (ure genes),
 serine-rich adhesin (group_2460). Let’s see if these colonization
 factors can be found in the GWAS results.</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>GWAS_rodent <span class="ot">&lt;-</span> res<span class="sc">$</span>GWAS_results</span>
-<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="co"># Sort the genes based on rodent standardized residuals and give them a rank</span></span>
-<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>GWAS_rodent <span class="ot">&lt;-</span> GWAS_rodent[<span class="fu">order</span>(GWAS_rodent<span class="sc">$</span><span class="st">`</span><span class="at">rodent std_residual</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a>GWAS_rodent<span class="sc">$</span>rank <span class="ot">&lt;-</span> <span class="fu">rank</span>(<span class="dv">1</span><span class="sc">-</span>GWAS_rodent<span class="sc">$</span><span class="st">`</span><span class="at">rodent std_residual</span><span class="st">`</span>, <span class="at">ties.method =</span> <span class="st">&quot;average&quot;</span>)</span>
-<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="co"># Print the rank of the known colonization factors</span></span>
-<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;ure&quot;</span>, GWAS_rodent<span class="sc">$</span>gene_family) <span class="sc">|</span></span>
-<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a>  GWAS_rodent<span class="sc">$</span>gene_family <span class="sc">==</span> <span class="st">&quot;group_2460&quot;</span></span>
-<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a>GWAS_rodent[index, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">28</span>)]</span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt;            gene_family rank</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; ureD1            ureD1  3.5</span></span>
-<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt; group_2460  group_2460  7.0</span></span>
-<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt; ureF              ureF 13.5</span></span>
-<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; ureG              ureG 13.5</span></span>
-<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="co">#&gt; ureE              ureE 13.5</span></span>
-<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="co">#&gt; ureC              ureC 13.5</span></span>
-<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="co">#&gt; ureA              ureA 13.5</span></span>
-<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="co">#&gt; ureB              ureB 13.5</span></span>
-<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="co">#&gt; ureI              ureI 13.5</span></span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>GWAS_rodent <span class="ot">&lt;-</span> res<span class="sc">$</span>GWAS_results</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co"># Sort the genes based on rodent standardized residuals and give them a rank</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>GWAS_rodent <span class="ot">&lt;-</span> GWAS_rodent[<span class="fu">order</span>(GWAS_rodent<span class="sc">$</span><span class="st">`</span><span class="at">rodent std_residual</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>GWAS_rodent<span class="sc">$</span>rank <span class="ot">&lt;-</span> <span class="fu">rank</span>(<span class="dv">1</span><span class="sc">-</span>GWAS_rodent<span class="sc">$</span><span class="st">`</span><span class="at">rodent std_residual</span><span class="st">`</span>, <span class="at">ties.method =</span> <span class="st">&quot;average&quot;</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="co"># Print the rank of the known colonization factors</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;ure&quot;</span>, GWAS_rodent<span class="sc">$</span>Variant) <span class="sc">|</span> GWAS_rodent<span class="sc">$</span>Variant <span class="sc">==</span> <span class="st">&quot;group_2460&quot;</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(GWAS_rodent[index, <span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">29</span>)], <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Variant
+</th>
+<th style="text-align:right;">
+rank
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+ureD1
+</td>
+<td style="text-align:left;">
+ureD1
+</td>
+<td style="text-align:right;">
+2.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureF
+</td>
+<td style="text-align:left;">
+ureF
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureG
+</td>
+<td style="text-align:left;">
+ureG
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureE
+</td>
+<td style="text-align:left;">
+ureE
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureC
+</td>
+<td style="text-align:left;">
+ureC
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureA
+</td>
+<td style="text-align:left;">
+ureA
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureB
+</td>
+<td style="text-align:left;">
+ureB
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ureI
+</td>
+<td style="text-align:left;">
+ureI
+</td>
+<td style="text-align:right;">
+9.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_2460
+</td>
+<td style="text-align:left;">
+group_2460
+</td>
+<td style="text-align:right;">
+17.0
+</td>
+</tr>
+</tbody>
+</table>
 <p>Indeed, we can see that the known colonization factors are among the
 top results. However, sorting features based on their standardized
 residuals may not be the best approach in all scenarios. Non-causal
 genes with low frequency can rank before the causal genes. It is a
-common practice to apply frequency cutoffs. <em>aurora</em> however uses
-F1 values which implicitly takes into account the frequency of the gene.
-Additionally, the user can choose to filter the results based on their
-precision value to remove high frequency non-causal genes.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> res<span class="sc">$</span>GWAS_results</span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> GWAS_human[GWAS_human<span class="sc">$</span><span class="st">`</span><span class="at">homo sapiens precision</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="fl">0.4</span>, ]</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> GWAS_human[<span class="fu">order</span>(GWAS_human<span class="sc">$</span><span class="st">`</span><span class="at">homo sapiens F1</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># print the top 10 human colonization factors</span></span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">head</span>(GWAS_human[,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">19</span>)], <span class="at">n =</span> <span class="dv">10</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a><span class="co">#&gt;                                                         gene_family</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a><span class="co">#&gt; xerC_5~~~xerC_6~~~xerD_2~~~xerC_2 xerC_5~~~xerC_6~~~xerD_2~~~xerC_2</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a><span class="co">#&gt; group_2589                                               group_2589</span></span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a><span class="co">#&gt; group_4028                                               group_4028</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a><span class="co">#&gt; group_4023                                               group_4023</span></span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a><span class="co">#&gt; group_4017                                               group_4017</span></span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a><span class="co">#&gt; panP                                                           panP</span></span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a><span class="co">#&gt; group_362                                                 group_362</span></span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="co">#&gt; tnpR~~~hin                                               tnpR~~~hin</span></span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt; group_2912                                               group_2912</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; strL~~~strL_1~~~strL_2                       strL~~~strL_1~~~strL_2</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt;                                   homo sapiens F1</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; xerC_5~~~xerC_6~~~xerD_2~~~xerC_2       0.7751627</span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; group_2589                              0.7327061</span></span>
-<span id="cb16-20"><a href="#cb16-20" tabindex="-1"></a><span class="co">#&gt; group_4028                              0.6885075</span></span>
-<span id="cb16-21"><a href="#cb16-21" tabindex="-1"></a><span class="co">#&gt; group_4023                              0.6885075</span></span>
-<span id="cb16-22"><a href="#cb16-22" tabindex="-1"></a><span class="co">#&gt; group_4017                              0.6885075</span></span>
-<span id="cb16-23"><a href="#cb16-23" tabindex="-1"></a><span class="co">#&gt; panP                                    0.6789960</span></span>
-<span id="cb16-24"><a href="#cb16-24" tabindex="-1"></a><span class="co">#&gt; group_362                               0.6312208</span></span>
-<span id="cb16-25"><a href="#cb16-25" tabindex="-1"></a><span class="co">#&gt; tnpR~~~hin                              0.5796407</span></span>
-<span id="cb16-26"><a href="#cb16-26" tabindex="-1"></a><span class="co">#&gt; group_2912                              0.5704057</span></span>
-<span id="cb16-27"><a href="#cb16-27" tabindex="-1"></a><span class="co">#&gt; strL~~~strL_1~~~strL_2                  0.5668412</span></span></code></pre></div>
+common practice in GWAS studies to apply frequency cutoffs.
+<em>aurora</em> however uses F1 values which implicitly takes into
+account the frequency of the gene. Additionally, the user can choose to
+filter the results based on their precision value to remove high
+frequency non-causal genes.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> res<span class="sc">$</span>GWAS_results</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> GWAS_human[GWAS_human<span class="sc">$</span><span class="st">`</span><span class="at">homo sapiens precision</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="fl">0.4</span>, ]</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>GWAS_human <span class="ot">&lt;-</span> GWAS_human[<span class="fu">order</span>(GWAS_human<span class="sc">$</span><span class="st">`</span><span class="at">homo sapiens F1</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>), ]</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a><span class="co"># print the top 10 human colonization factors</span></span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>index <span class="ot">&lt;-</span> <span class="fu">grepl</span>(<span class="st">&quot;ure&quot;</span>, GWAS_rodent<span class="sc">$</span>Variant) <span class="sc">|</span> GWAS_rodent<span class="sc">$</span>Variant <span class="sc">==</span> <span class="st">&quot;group_2460&quot;</span></span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(GWAS_human[<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">20</span>)], <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Variant
+</th>
+<th style="text-align:right;">
+homo sapiens F1
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+xerC_5~<del>xerC_6</del><sub>xerD_2</sub>~~xerC_2
+</td>
+<td style="text-align:left;">
+xerC_5~<del>xerC_6</del><sub>xerD_2</sub>~~xerC_2
+</td>
+<td style="text-align:right;">
+0.8064202
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_2589
+</td>
+<td style="text-align:left;">
+group_2589
+</td>
+<td style="text-align:right;">
+0.7553366
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_4028
+</td>
+<td style="text-align:left;">
+group_4028
+</td>
+<td style="text-align:right;">
+0.7120743
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_4023
+</td>
+<td style="text-align:left;">
+group_4023
+</td>
+<td style="text-align:right;">
+0.7120743
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_4017
+</td>
+<td style="text-align:left;">
+group_4017
+</td>
+<td style="text-align:right;">
+0.7120743
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+panP
+</td>
+<td style="text-align:left;">
+panP
+</td>
+<td style="text-align:right;">
+0.6403807
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_362
+</td>
+<td style="text-align:left;">
+group_362
+</td>
+<td style="text-align:right;">
+0.6355311
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_260
+</td>
+<td style="text-align:left;">
+group_260
+</td>
+<td style="text-align:right;">
+0.6178300
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tnpR~~~hin
+</td>
+<td style="text-align:left;">
+tnpR~~~hin
+</td>
+<td style="text-align:right;">
+0.6005900
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+group_252
+</td>
+<td style="text-align:left;">
+group_252
+</td>
+<td style="text-align:right;">
+0.5803686
+</td>
+</tr>
+</tbody>
+</table>
 <p>In conclusion, we advise the users run <code>aurora_pheno()</code>
 with all machine learning algorithms and with
 <code>phylogenetic_walk</code> if a reliable phylogenetic tree is
 available. The user should then experiment with different settings of
 <code>aurora_GWAS()</code>. I often map the removed strains back to the
-phylogenetic tree to see if the results make sense. You can use
-<code>res$removed_strains</code> for this.</p>
+phylogenetic tree to see how the allochthonous strains are dispersed
+around the tree. You can use <code>res$removed_strains</code> for
+this.</p>
 </div>
 
 

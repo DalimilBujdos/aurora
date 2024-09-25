@@ -205,6 +205,19 @@ aurora_pheno <- function(
                          1:length(unique(pheno_mat$pheno)))
   pheno_mat$pheno <- as.factor(names(lookup_tbl)[match(pheno_mat$pheno, lookup_tbl)])
   phenotypes <- as.factor(levels(pheno_mat$pheno))
+  # check that the classes are roughly balanced and that we have enough strains to run the analysis
+  pheno_tbl <- as.data.frame(table(pheno_mat$pheno))
+  if (any(pheno_tbl$Freq < 20)) {
+    warning("Some phenotype categories have less than 20 strains. In such case results from aurora_pheno() may not be reliable.")
+  }
+
+  maxi <- pheno_tbl$Freq[which.max(pheno_tbl$Freq)]
+  pheno_tbl$Freq <- maxi/pheno_tbl$Freq
+
+  if (any(pheno_tbl$Freq < 20)) {
+    warning("The number of strains in phenotype categories is not balanced. In such case results from aurora_pheno() may not be reliable.")
+  }
+
   # prepare bin_mat based on input source (panaroo/roary, DRAM, SNPs, unitigs, kmers, scarap, custom)
   pangenome <- FALSE
   DRAM <-  FALSE

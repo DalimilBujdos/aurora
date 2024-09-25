@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -356,9 +356,9 @@ to interpret results of SNPs targeted analysis.</p>
 <h2>Workflow</h2>
 <p>Let’s first load some data. We will investigate association between
 core-genome SNPs and penicillin resistance of <em>Neisseria
-meningitidis</em> serogroup B. See the <em>aurora</em> paper for more
-details. Unlike in pangenome GWAS, the input binary matrix is not a
-dataframe; instead, it is a system path leading to a VCF file.
+meningitidis</em> serogroup B. See the <em>aurora</em> paper for details
+of this dataset. Unlike in pangenome GWAS, the input binary matrix is
+not a dataframe; instead, it is a system path leading to a VCF file.
 <em>aurora</em> assumes that the VCF file has these columns: #CHROM,
 POS, ID, REF, ALT, QUAL, FILTER, INFO, FORMAT and a column for each
 analysed strain.</p>
@@ -378,9 +378,10 @@ more than 95% of all strains). We will also set <code>run_chisq</code>
 to TRUE and <code>cutoff_chisq</code> to 0.1. This will run chi-square
 test with each SNP. If the p-value of the test is higher than 0.1
 (<em>e.g.,</em> the feature is uniformly distributed) then the SNP is
-removed. Another way to reduce the amount of analyzed variants is to
-group correlated SNPs. By default <em>aurora</em> uses Hamming filter to
-do this. Hamming filter however is more likely to collapse features with
+removed.</p>
+<p>Another way to reduce the amount of analyzed variants is to group
+correlated SNPs. By default <em>aurora</em> uses Hamming filter to do
+this. Hamming filter however is more likely to collapse features with
 lower frequency. It thus might be beneficial to use Jaccard filter
 instead. Jaccard filter utilizes DBSCAN to identify the correlated
 variants. DBSCAN is an algorithm that may require fine tuning
@@ -388,38 +389,169 @@ variants. DBSCAN is an algorithm that may require fine tuning
 thus may need to experiment with the parameters to find those that do
 not remove too many variants. In this case, the initial filtering
 removed 46858 variants, the chi-square filter removed additional 53224,
-Ancestral reconstruction filter removed 303 variants and Jaccard filter
-with the default parameters collapsed 2377 variants. The number of
-variants was reduced to 7160.</p>
+Ancestral reconstruction filter removed 291 variants and Jaccard filter
+with the default parameters collapsed 2396 variants. The number of
+variants was reduced to 7174.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">aurora_pheno</span>(<span class="at">pheno_mat =</span> pheno_mat,</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                        <span class="at">bin_mat_snps =</span> bin_mat_snps,</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                        <span class="at">which_snps =</span> <span class="st">&quot;all_alleles&quot;</span>,</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                        <span class="at">low_perc_cutoff =</span> <span class="dv">5</span>,</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                        <span class="at">upp_perc_cutoff =</span> <span class="dv">95</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                        <span class="at">jaccard_filter =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                        <span class="at">run_chisq =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                        <span class="at">cutoff_chisq =</span> <span class="fl">0.1</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                        <span class="at">condaenv_path =</span> <span class="st">&quot;/path/to/conda/env&quot;</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>                        <span class="at">bin_mat =</span> bin_mat_snps,</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                        <span class="at">type_bin_mat =</span> <span class="st">&quot;SNPs&quot;</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                        <span class="at">which_snps =</span> <span class="st">&quot;all_alleles&quot;</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                        <span class="at">tree =</span> tree,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                        <span class="at">low_perc_cutoff =</span> <span class="dv">5</span>,</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                        <span class="at">upp_perc_cutoff =</span> <span class="dv">95</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>                        <span class="at">jaccard_filter =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>                        <span class="at">run_chisq =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>                        <span class="at">cutoff_chisq =</span> <span class="fl">0.1</span>,</span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                        <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p>The function above will not be run because it takes a few hours to
 finish. Let’s load the precalculated results and run
 <code>aurora_GWAS</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;aurora_pheno_results_neisseria&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">aurora_GWAS</span>(<span class="at">bin_mat_snps =</span> bin_mat_snps,</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                   <span class="at">pheno_mat =</span> pheno_mat,</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                   <span class="at">tree =</span> tree,</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                   <span class="at">aurora_results =</span> results,</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                   <span class="at">mode =</span> <span class="st">&quot;consensus&quot;</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
-<p>The results are the same as in pangenome GWAS except unique
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;aurora_pheno_results_neisseria&quot;</span>) <span class="co"># load the precalculated results</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">aurora_GWAS</span>(<span class="at">bin_mat =</span> bin_mat_snps,</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>                   <span class="at">type_bin_mat =</span> <span class="st">&quot;SNPs&quot;</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>                   <span class="at">pheno_mat =</span> pheno_mat,</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>                   <span class="at">tree =</span> tree,</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>                   <span class="at">aurora_results =</span> results,</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>                   <span class="at">mode =</span> <span class="st">&quot;consensus&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; Random forest removes 106 strains </span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; Adaboost removes 87 strains </span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; Log regression removes 89 strains </span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; CART removes 136 strains </span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt; Consensus mode removed in total 72 strains. There are 99 strains left. </span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt; Finished</span></span></code></pre></div>
+<p>The results are the same as in pangenome GWAS except the unique
 identifiers. The identifier of SNP is a combination of the contig
 identifier (<em>i.e.,</em> gnl_funcentre_CHJKMJOA_1) and the position in
 the contig (<em>i.e.,</em> 10560). Let’s print the top 5 SNPs associated
 with the resistant phenotype.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>res<span class="sc">$</span>GWAS_results <span class="ot">&lt;-</span> res<span class="sc">$</span>GWAS_results[<span class="fu">order</span>(res<span class="sc">$</span>GWAS_results<span class="sc">$</span><span class="st">`</span><span class="at">resistant std_residual</span><span class="st">`</span>, <span class="at">decreasing =</span> <span class="cn">TRUE</span>),]</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>GWAS_results[,<span class="fu">c</span>(<span class="dv">9</span><span class="sc">:</span><span class="dv">12</span>)], <span class="dv">5</span>) </span></code></pre></div>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(res<span class="sc">$</span>GWAS_results[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">9</span>)], <span class="at">format =</span> <span class="st">&quot;html&quot;</span>, <span class="at">table.attr =</span> <span class="st">&quot;class=&#39;table table-striped&#39;&quot;</span>)</span></code></pre></div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Variant
+</th>
+<th style="text-align:right;">
+sensitive ratio
+</th>
+<th style="text-align:right;">
+resistant ratio
+</th>
+<th style="text-align:right;">
+chisq p.val
+</th>
+<th style="text-align:right;">
+resistant std_residual
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52122
+</td>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52122
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+0.0004998
+</td>
+<td style="text-align:right;">
+6.582806
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52128
+</td>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52128
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+0.0004998
+</td>
+<td style="text-align:right;">
+6.582806
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52544
+</td>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52544
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+0.0004998
+</td>
+<td style="text-align:right;">
+6.582806
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52554
+</td>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52554
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+0.0004998
+</td>
+<td style="text-align:right;">
+6.582806
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52178
+</td>
+<td style="text-align:left;">
+gnl_funcentre_CHJKMJOA_12_52178
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.2777778
+</td>
+<td style="text-align:right;">
+0.0004998
+</td>
+<td style="text-align:right;">
+5.954372
+</td>
+</tr>
+</tbody>
+</table>
 <p>These are all in the same contig and around the same locus. In the
 next step we could construct a Manhattan plot using for example <a href="https://jameshadfield.github.io/phandango/#/">Phandango</a>.</p>
 </div>

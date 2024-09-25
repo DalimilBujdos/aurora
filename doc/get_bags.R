@@ -88,9 +88,13 @@ result <- tuneParams(
 best_params <- result$x
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  results_aurora <- aurora_pheno(pheno_mat = data("pheno_mat_reuteri"),
-#                                 bin_mat = data("bin_mat_reuteri"),
-#                                 tree = data("tree_reuteri"),
+#  data("pheno_mat_reuteri")
+#  data("bin_mat_reuteri")
+#  data("tree_reuteri")
+#  results_aurora <- aurora_pheno(pheno_mat = pheno_mat,
+#                                 bin_mat = bin_mat,
+#                                 type_bin_mat = "panaroo",
+#                                 tree = tree,
 #                                 fit_parameters = FALSE,
 #                                 sampsize = best_params$sampsize,
 #                                 mtry = best_params$mtry,
@@ -98,7 +102,8 @@ best_params <- result$x
 #                                 maxnodes = best_params$maxnodes,
 #                                 ovr_log_reg = FALSE,
 #                                 adaboost = FALSE,
-#                                 CART = FALSE)
+#                                 CART = FALSE,
+#                                 write_data = FALSE)
 #  
 
 ## -----------------------------------------------------------------------------
@@ -157,7 +162,8 @@ for (i in 1:nrow(features)) {
 }
 features <- features[order(features$Freq, features$importance, decreasing = TRUE), ]
 colnames(features) <- c("Gene", "Frequence", "Importance")
-# plot the top 15 features along with their frequences in the 10 models and the median of their importances
+# print the top 15 features along with their frequences in the 10 models and the median of their importances
+knitr::kable(features[1:15,], format = "html", table.attr = "class='table table-striped'")
 head(features, 15)
 
 ## -----------------------------------------------------------------------------

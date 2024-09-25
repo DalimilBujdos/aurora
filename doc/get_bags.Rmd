@@ -18,11 +18,14 @@ knitr::opts_chunk$set(
 )
 ```
 ## Introduction
-In this vignette we will explore the function `get_bags()`. This function is used internally in both `aurora_pheno()` and `aurora_GWAS()` but can be also accessed upon installing *aurora*. The function takes a dataset of microbial strains and returns a bootstrapped dataset that is adjusted for the population structure. `get_bags()` has many possible uses and we will demonstrate a few here.
+In this vignette we will explore the function `get_bags()`. This function is used internally in both `aurora_pheno()` and `aurora_GWAS()` but can be also accessed directly upon installing *aurora*. The function takes a dataset of microbial strains and returns a bootstrapped dataset that is adjusted for population structure. `get_bags()` has many possible uses and we will demonstrate a few here.
+
 ## Description of function `get_bags()`
 This function requires two inputs. The phenotype matrix (`pheno_mat`) which has to be in the same format as the one used in `aurora_pheno()` and `aurora_GWAS()` and a phylogenetic reconstruction. This can be either a phylogenetic tree loaded as a phylo object or a distance matrix that contains phylogenetic pairwise distances (core genome amino acid identities (cAAI) or average nucleotide identities (ANI) converted to distances).
+
 ## Objective
-Example 1: `aurora_pheno()` uses a grid search to fine-tune hyperparameters for Random Forest and AdaBoost. However, this process is very time consuming. Additionally, the user is only restricted to the parameters that are in the grid that `aurora_pheno()` uses (see supplementary materials in the aurora paper). However, you can use `get_bags()` to get the adjusted datasets and then use your favorite hyperparameter search method to get the best results.
+
+Example 1: `aurora_pheno()` uses a grid search to fine-tune hyperparameters for Random Forest and AdaBoost. However, this process is very time consuming. Additionally, the user is only restricted to the parameters that are in the grid that `aurora_pheno()` uses (see supplementary materials in the *aurora* paper). However, you can use `get_bags()` to get adjusted datasets and then use your favorite hyperparameter search method to get the best results.
 
 Example 2: `aurora_pheno()` uses four machine learning algorithms to identify the mislabeled strains. However, these machine learning algorithms may not be optimal for your dataset and you may want to explore other options. Machine learning algorithms often learn the phylogenetic background rather than the existing causal features. To minimize this issue we will first use `get_bags()` to obtain multiple bootstrapped datasets that are adjusted for phylogenetic non-independence and then construct corresponding XGBoost models. The results from these models will be combined to obtain the most probable causal features and to identify potentially mislabeled strains (a simple implementation of `aurora_pheno()` and `aurora_GWAS()`). 
 
@@ -67,7 +70,7 @@ non_select_ID_low <- which(colSums(bin_mat) > cutoff)
 bin_mat <- bin_mat[, intersect(select_ID_up, non_select_ID_low)]
 ```
 # Example 1
-With the data loaded we can run `get_bags()` to obtain the bootstrapped dataset. *aurora* uses two algorithms to bootstrap the data: `phylogenetic_walk` and `random_walk`. This is controlled by a parameter `bagging`. If you wish to observe the distinctions between the two algorithms, please refer to the supplementary materials of the *aurora* paper. Both algorithms are stochastic and therefore you should either repeat the hyperparameter tuning multiple times (each time with different bootstrapped dataset) or you can simply set the parameter `bag_size` to a large number. This parameter controls how many strains from each class will be selected to the bootstrapped dataset. If you want to repeat the parameter search multiple times, you can get multiple bags with just one run of `get_bags()` by changing the parameter `no_rf`. In this case, we will set `bag_size` to a large number and then use random hyperparameter search to find the best hyperparameters for random forest model.
+With the data loaded we can run `get_bags()` to obtain the bootstrapped dataset. *aurora* uses two algorithms to bootstrap the data: `phylogenetic_walk` and `random_walk`. This is controlled by a parameter `bagging`. If you wish to find out the distinctions between the two algorithms, please refer to the supplementary materials of the *aurora* paper. Both algorithms are stochastic and therefore you should either repeat the hyperparameter tuning multiple times (each time with different bootstrapped dataset) or you can simply set the parameter `bag_size` to a large number. This parameter controls how many strains from each class will be selected to the bootstrapped dataset. If you want to repeat the parameter search multiple times, you can get multiple bags with just one run of `get_bags()` by changing the parameter `no_rf`. In this case, we will set `bag_size` to a large number and then use random hyperparameter search to find the best hyperparameters for random forest model.
 ```{r}
 # Get the train dataset
 bag <- get_bags(pheno_mat,
@@ -113,9 +116,13 @@ best_params <- result$x
 ```
 The best hyperparameters are now in list `best_params`and we can use it to run `aurora_pheno()` (run only with random forest).
 ```{r, eval = FALSE}
-results_aurora <- aurora_pheno(pheno_mat = data("pheno_mat_reuteri"),
-                               bin_mat = data("bin_mat_reuteri"),
-                               tree = data("tree_reuteri"),
+data("pheno_mat_reuteri")
+data("bin_mat_reuteri")
+data("tree_reuteri")
+results_aurora <- aurora_pheno(pheno_mat = pheno_mat,
+                               bin_mat = bin_mat,
+                               type_bin_mat = "panaroo",
+                               tree = tree,
                                fit_parameters = FALSE,
                                sampsize = best_params$sampsize,
                                mtry = best_params$mtry,
@@ -123,7 +130,8 @@ results_aurora <- aurora_pheno(pheno_mat = data("pheno_mat_reuteri"),
                                maxnodes = best_params$maxnodes,
                                ovr_log_reg = FALSE,
                                adaboost = FALSE,
-                               CART = FALSE)
+                               CART = FALSE,
+                               write_data = FALSE)
 
 ```
 # Example 2: 
@@ -138,7 +146,7 @@ bag <- get_bags(pheno_mat,
                 )
 
 ```
-Now that the 10 training datasets were obtained we can start building the XGBoost models. Once an XGBoost model is built we can pull out the importances (feature gains in this case) and we can also use the model to predict classification probabilities of the original dataset. In case of a multiclass problem the feature importances will not make much sense. Thus, let's reduce the number of classes to two: rodent and the rest.
+Now that the 10 training datasets were obtained, we can start building XGBoost models. Once an XGBoost model is built we can pull out the importances (feature gains in this case) and we can also use the model to predict classification probabilities of the original dataset. In case of a multiclass problem the feature importances will not make much sense. Thus, let's reduce the number of classes to two: rodent and the rest.
 ```{r}
 # make a list that will hold all the feature importances
 importances <- vector(mode = "list", 10)
@@ -167,7 +175,7 @@ for (i in 1:10) {
   probs[[i]] <- predict(model, bin_mat_adjust)
 }
 ```
-The last step is to calculate a median for all the feature importances and the number of times it was used in the 10 models. Additionally, the median of the 10 classification probabilities will also be calculated. This will allow us to identify potentially mislabeled strains.
+The last step is to calculate median for all feature importances and the number of times it was used in the 10 models. Additionally, the median of the 10 classification probabilities will also be calculated. This will allow us to identify potentially mislabeled strains.
 ```{r}
 # analyze the classification probabilities
 medians <- apply(do.call(cbind, probs), 1, median)
@@ -186,7 +194,8 @@ for (i in 1:nrow(features)) {
 }
 features <- features[order(features$Freq, features$importance, decreasing = TRUE), ]
 colnames(features) <- c("Gene", "Frequence", "Importance")
-# plot the top 15 features along with their frequences in the 10 models and the median of their importances
+# print the top 15 features along with their frequences in the 10 models and the median of their importances
+knitr::kable(features[1:15,], format = "html", table.attr = "class='table table-striped'")
 head(features, 15)
 ```
 These results contain some of the experimentally confirmed rodent colonization factors and we can thus conclude that the models (at least partially) were able to identify causal features. In the next cell, we will plot the classification probabilities. This will allow us to identify strains that might be mislabeled. 

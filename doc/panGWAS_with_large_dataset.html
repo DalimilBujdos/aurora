@@ -49,7 +49,7 @@ overflow: visible;
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -386,19 +386,21 @@ there variability is present even in clonal lineages. In the
 <em>aurora</em> paper we show that some clonal lineages of <em>S.</em>
 Typhimurium contain strains isolated from multiple habitats. Reducing
 the amount of strains thus may lead to a significant loss of
-information. Instead of removing strains you can configure
-<em>aurora</em> to do just a fraction of the computation thus lowering
-the computational time. If you are sure that your dataset does not
-contain any mislabelled strains and you are sure that the species is
-adapted to the phenotype, then you do not have to run the
-computationally exhausting <code>aurora_pheno()</code> function and just
-run the GWAS analysis with <code>aurora_GWAS()</code>. Runnig this
-function should take just a few minutes</p>
+information.</p>
+<p>Instead of removing strains you can configure <em>aurora</em> to do
+just a fraction of the computation thus lowering the computational time.
+If you are sure that your dataset does not contain any mislabelled
+strains and you are sure that the species is adapted to the phenotype,
+then you do not have to run the computationally exhausting
+<code>aurora_pheno()</code> function and just run the GWAS analysis with
+<code>aurora_GWAS()</code>. Runnig this function should take just a few
+minutes</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># run GWAS analysis without results from aurora_pheno()</span></span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">aurora_GWAS</span>(<span class="at">bin_mat =</span> bin_mat,</span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>                   <span class="at">pheno_mat =</span> pheno_mat,</span>
 <span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                   <span class="at">tree =</span> <span class="fu">midpoint</span>(tree),</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>                   <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; Finished</span></span></code></pre></div>
 <p>See vignette <code>panGWAS</code> to see how to postprocess the GWAS
 results.</p>
 <p>However, what if you want to run <code>aurora_pheno()</code>. What is
@@ -421,15 +423,15 @@ associations and for identifying more mislabelled strains. Thus we will
 disable the two remaining algorithms: log regression
 (<code>ovr_log_reg = FALSE</code>) and AdaBoost
 (<code>adaboost = FALSE</code>) to retain only the two most informative
-models. This will reduce the computational time almost twofold. Another
-way to lower the computational time is to reduce the number of strains
-in the training dataset. You can do so by modifying the argument
-<code>bag_size</code>. By default <code>bag_size</code> is set to 5* the
-number of strains in the class with the fewest strains. Hence, if you
-have 60 strains in class A, 30 strains in class B and 80 strains in
-class C the training dataset will contain 150 strains from each class.
-We can lower this by setting the parameter <code>bag_size</code> to
-<code>bag_size = c(75,75,75)</code>. This way of reducing the
+models. This will reduce the computational time almost twofold.</p>
+<p>Another way to lower the computational time is to reduce the number
+of strains in the training dataset. You can do so by modifying the
+argument <code>bag_size</code>. By default <code>bag_size</code> is set
+to 5* the number of strains in the class with the fewest strains. Hence,
+if you have 60 strains in class A, 30 strains in class B and 80 strains
+in class C the training dataset will contain 150 strains from each
+class. We can lower this by setting the parameter <code>bag_size</code>
+to <code>bag_size = c(75,75,75)</code>. This way of reducing the
 computational time is suitable in cases where the dataset contains
 roughly the same number of strains in each class. Sometimes fitting
 parameters to AdaBoost and Random Forest takes a long time. This fitting
@@ -468,14 +470,15 @@ can change to reduce the computational time.</p>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">aurora_pheno</span>(<span class="at">pheno_mat =</span> pheno_mat,</span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a>             <span class="at">bin_mat =</span> bin_mat,</span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>             <span class="at">tree =</span> tree,</span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>             <span class="at">bag_size =</span> <span class="fu">unname</span>(bag_size),</span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>             <span class="at">bagging =</span> <span class="st">&quot;random_walk&quot;</span>, <span class="co"># use random walk which is faster than phylogenetic walk</span></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>             <span class="at">repeats =</span> <span class="dv">5</span>, <span class="co"># This will lower the time needed to fit hyperparameters to Random Forest</span></span>
-<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>             <span class="at">ovr_log_reg =</span> <span class="cn">FALSE</span>, <span class="co"># Do not use log regression</span></span>
-<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>             <span class="at">adaboost =</span> <span class="cn">FALSE</span> , <span class="co"># Do not use AdaBoost</span></span>
-<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>             <span class="at">no_rounds =</span> <span class="dv">50</span>, <span class="co"># From literature we know that reuteri colonization factors have high effect size. Therefore we can reduce this argument</span></span>
-<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>             <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a>             <span class="at">type_bin_mat =</span> <span class="st">&quot;custom&quot;</span>,</span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a>             <span class="at">tree =</span> tree,</span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a>             <span class="at">bag_size =</span> <span class="fu">unname</span>(bag_size),</span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a>             <span class="at">bagging =</span> <span class="st">&quot;random_walk&quot;</span>, <span class="co"># use random walk which is faster than phylogenetic walk</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a>             <span class="at">repeats =</span> <span class="dv">5</span>, <span class="co"># This will lower the time needed to fit hyperparameters to Random Forest</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a>             <span class="at">ovr_log_reg =</span> <span class="cn">FALSE</span>, <span class="co"># Do not use log regression</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a>             <span class="at">adaboost =</span> <span class="cn">FALSE</span> , <span class="co"># Do not use AdaBoost</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a>             <span class="at">no_rounds =</span> <span class="dv">50</span>, <span class="co"># From literature we know that reuteri colonization factors have high effect size. Therefore we can reduce this argument</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a>             <span class="at">write_data =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p>Sometimes the number of strains is not limiting but the number of
 features is (<em>i.e.,</em> when SNPs or k-mers are used as the
 investigated variants). In this case, follow the vignette
